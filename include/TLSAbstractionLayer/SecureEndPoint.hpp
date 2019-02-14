@@ -46,7 +46,7 @@ namespace TLSAbstractionLayer
                     std::string cotcp,
                     std::list<std::string> csl);
 
-    //virtual ~SecureEndPoint ();
+    virtual ~SecureEndPoint ();
 
   public:
     void setProtocol(Protocol);

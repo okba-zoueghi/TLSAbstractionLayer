@@ -3,7 +3,6 @@
 namespace TLSAbstractionLayer {
 
   SecureEndPoint::SecureEndPoint(){
-
   }
 
   SecureEndPoint::SecureEndPoint (Protocol p,
@@ -21,6 +20,9 @@ namespace TLSAbstractionLayer {
                   socketFileDescriptor(sockfd), privateKeyPath(pkp), endPointCertPath(epcp),
                   chainOfTrustCertPath(cotcp), cipherSuiteList(csl)  {
                   }
+
+  SecureEndPoint::~SecureEndPoint(){
+  }
 
   void SecureEndPoint::setProtocol(Protocol p){
   protocol = p;

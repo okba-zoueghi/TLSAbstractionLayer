@@ -139,6 +139,26 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
+  void OpenSSLSecureEndPoint::setupPeerVerification(){
+
+    if (verifyPeerCerificate)
+    {
+      switch (endPointRole)
+      {
+        case CLIENT:
+          SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+          break;
+        case SERVER:
+          SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
+          break;
+      }
+    }
+    else
+    {
+      SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+    }
+  }
+
   int OpenSSLSecureEndPoint::setup(){
 
     char pk[privateKeyPath.size()+1];
@@ -154,10 +174,7 @@ namespace TLSAbstractionLayer {
 
     setupProtocol();
     setupVersion();
-
-
-
-    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+    setupPeerVerification();
 
     if (SSL_CTX_load_verify_locations(ctx, cacert, NULL) == 1)
   	{

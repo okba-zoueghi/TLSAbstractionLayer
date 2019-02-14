@@ -43,6 +43,7 @@ namespace TLSAbstractionLayer {
   private:
     int setupProtocol();
     int setupVersion();
+    void setupPeerVerification();
   };
 
 } /* TLSAbstractionLayer */

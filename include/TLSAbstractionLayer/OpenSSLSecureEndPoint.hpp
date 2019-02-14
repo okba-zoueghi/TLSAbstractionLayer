@@ -42,6 +42,7 @@ namespace TLSAbstractionLayer {
     int receive(char *, int);
   private:
     int setupProtocol();
+    int setupVersion();
   };
 
 } /* TLSAbstractionLayer */

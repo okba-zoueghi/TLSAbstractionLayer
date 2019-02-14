@@ -85,23 +85,10 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
-  int OpenSSLSecureEndPoint::setup(){
-
-
+  int OpenSSLSecureEndPoint::setupVersion()
+  {
     int maxVersion = -1;
     int minVersion = -1;
-    char pk[privateKeyPath.size()+1];
-    char cert[endPointCertPath.size()+1];
-    char cacert[chainOfTrustCertPath.size()+1];
-
-    privateKeyPath.copy(pk,privateKeyPath.size()+1);
-    pk[privateKeyPath.size()] = '\0';
-    endPointCertPath.copy(cert,endPointCertPath.size()+1);
-    cert[endPointCertPath.size()] = '\0';
-    chainOfTrustCertPath.copy(cacert,chainOfTrustCertPath.size()+1);
-    cacert[chainOfTrustCertPath.size()] = '\0';
-
-    setupProtocol();
 
     if(protocol == TLS)
     {
@@ -118,11 +105,11 @@ namespace TLSAbstractionLayer {
           break;
       }
 
-      if(minVersion != -1)
-      {
-        if(SSL_CTX_set_min_proto_version(ctx,minVersion) == 0)
-          return -1;
-      }
+      if (minVersion == -1)
+        return -1;
+
+      if(SSL_CTX_set_min_proto_version(ctx,minVersion) == 0)
+        return -1;
 
       switch (maxProtocolVersion)
       {
@@ -137,17 +124,38 @@ namespace TLSAbstractionLayer {
           break;
       }
 
-      if(maxVersion != -1)
-      {
-        if(SSL_CTX_set_max_proto_version(ctx,maxVersion) == 0)
-          return -1;
-      }
+      if (maxVersion == -1)
+        return -1;
 
+      if(SSL_CTX_set_max_proto_version(ctx,maxVersion) == 0)
+        return -1;
     }
     else
     {
       /* DTLS TODO */
+      return -1;
     }
+
+    return 0;
+  }
+
+  int OpenSSLSecureEndPoint::setup(){
+
+    char pk[privateKeyPath.size()+1];
+    char cert[endPointCertPath.size()+1];
+    char cacert[chainOfTrustCertPath.size()+1];
+
+    privateKeyPath.copy(pk,privateKeyPath.size()+1);
+    pk[privateKeyPath.size()] = '\0';
+    endPointCertPath.copy(cert,endPointCertPath.size()+1);
+    cert[endPointCertPath.size()] = '\0';
+    chainOfTrustCertPath.copy(cacert,chainOfTrustCertPath.size()+1);
+    cacert[chainOfTrustCertPath.size()] = '\0';
+
+    setupProtocol();
+    setupVersion();
+
+
 
     SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
 

@@ -32,6 +32,8 @@ namespace TLSAbstractionLayer {
 
     OpenSSLSecureEndPoint (const OpenSSLSecureEndPoint&);
 
+    OpenSSLSecureEndPoint& operator=(const OpenSSLSecureEndPoint&);
+
     ~OpenSSLSecureEndPoint ();
 
     int setup();

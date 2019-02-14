@@ -32,6 +32,25 @@ namespace TLSAbstractionLayer {
                                         opensslEndpoint.cipherSuiteList), ctx(NULL), ssl(NULL){
 
                                         }
+  OpenSSLSecureEndPoint& OpenSSLSecureEndPoint::operator=(const OpenSSLSecureEndPoint& opensslEndpoint){
+      if (this != &opensslEndpoint)
+      {
+        SSL_CTX_free(ctx);
+        SSL_free(ssl);
+        protocol = opensslEndpoint.protocol;
+        minProtocolVersion = opensslEndpoint.minProtocolVersion;
+        maxProtocolVersion = opensslEndpoint.maxProtocolVersion;
+        endPointRole = opensslEndpoint.endPointRole;
+        verifyPeerCerificate = opensslEndpoint.verifyPeerCerificate;
+        socketFileDescriptor = opensslEndpoint.socketFileDescriptor;
+        privateKeyPath = opensslEndpoint.privateKeyPath;
+        endPointCertPath = opensslEndpoint.endPointCertPath;
+        chainOfTrustCertPath = opensslEndpoint.chainOfTrustCertPath;
+        cipherSuiteList = opensslEndpoint.cipherSuiteList;
+        handshake = HandshakeState::NOTESTABLISHED;
+      }
+      return *this;
+  }
 
   OpenSSLSecureEndPoint::~OpenSSLSecureEndPoint(){
       SSL_CTX_free(ctx);

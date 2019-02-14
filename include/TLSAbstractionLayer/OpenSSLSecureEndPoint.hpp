@@ -40,6 +40,8 @@ namespace TLSAbstractionLayer {
     int doHandshake();
     int send(const char *, int);
     int receive(char *, int);
+  private:
+    int setupProtocol();
   };
 
 } /* TLSAbstractionLayer */

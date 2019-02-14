@@ -57,22 +57,9 @@ namespace TLSAbstractionLayer {
       SSL_free(ssl);
   }
 
-  int OpenSSLSecureEndPoint::setup(){
-
+  int OpenSSLSecureEndPoint::setupProtocol()
+  {
     const SSL_METHOD * method = NULL;
-    int maxVersion = -1;
-    int minVersion = -1;
-    char pk[privateKeyPath.size()+1];
-    char cert[endPointCertPath.size()+1];
-    char cacert[chainOfTrustCertPath.size()+1];
-
-    privateKeyPath.copy(pk,privateKeyPath.size()+1);
-    pk[privateKeyPath.size()] = '\0';
-    endPointCertPath.copy(cert,endPointCertPath.size()+1);
-    cert[endPointCertPath.size()] = '\0';
-    chainOfTrustCertPath.copy(cacert,chainOfTrustCertPath.size()+1);
-    cacert[chainOfTrustCertPath.size()] = '\0';
-
     switch (protocol)
     {
       case TLS:
@@ -94,6 +81,27 @@ namespace TLSAbstractionLayer {
     {
       return -1;
     }
+
+    return 0;
+  }
+
+  int OpenSSLSecureEndPoint::setup(){
+
+
+    int maxVersion = -1;
+    int minVersion = -1;
+    char pk[privateKeyPath.size()+1];
+    char cert[endPointCertPath.size()+1];
+    char cacert[chainOfTrustCertPath.size()+1];
+
+    privateKeyPath.copy(pk,privateKeyPath.size()+1);
+    pk[privateKeyPath.size()] = '\0';
+    endPointCertPath.copy(cert,endPointCertPath.size()+1);
+    cert[endPointCertPath.size()] = '\0';
+    chainOfTrustCertPath.copy(cacert,chainOfTrustCertPath.size()+1);
+    cacert[chainOfTrustCertPath.size()] = '\0';
+
+    setupProtocol();
 
     if(protocol == TLS)
     {

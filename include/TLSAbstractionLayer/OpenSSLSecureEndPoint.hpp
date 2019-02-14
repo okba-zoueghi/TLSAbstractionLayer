@@ -6,6 +6,7 @@
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <iostream>
 
 namespace TLSAbstractionLayer {
 
@@ -44,6 +45,9 @@ namespace TLSAbstractionLayer {
     int setupProtocol();
     int setupVersion();
     void setupPeerVerification();
+    int setupCredentials();
+    int setupCiphersuiteList();
+    int setupRole();
   };
 
 } /* TLSAbstractionLayer */

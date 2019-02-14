@@ -159,8 +159,8 @@ namespace TLSAbstractionLayer {
     }
   }
 
-  int OpenSSLSecureEndPoint::setup(){
-
+  int OpenSSLSecureEndPoint::setupCredentials()
+  {
     char pk[privateKeyPath.size()+1];
     char cert[endPointCertPath.size()+1];
     char cacert[chainOfTrustCertPath.size()+1];
@@ -172,52 +172,74 @@ namespace TLSAbstractionLayer {
     chainOfTrustCertPath.copy(cacert,chainOfTrustCertPath.size()+1);
     cacert[chainOfTrustCertPath.size()] = '\0';
 
-    setupProtocol();
-    setupVersion();
-    setupPeerVerification();
+    if (SSL_CTX_load_verify_locations(ctx, cacert, NULL) != 1)
+      return -1;
 
-    if (SSL_CTX_load_verify_locations(ctx, cacert, NULL) == 1)
-  	{
-  		printf("loaded chain of trust\n");
-  	}
-  	else
-  	{
-  		printf("failed to load chain of trust\n");
-  		exit(EXIT_FAILURE);
-  	}
+    if (SSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) <= 0)
+      return -1;
 
-	/* Set the key and cert */
-    if (SSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) <= 0) {
-        ERR_print_errors_fp(stderr);
-	exit(EXIT_FAILURE);
-    }
-
-    if (SSL_CTX_use_PrivateKey_file(ctx, pk, SSL_FILETYPE_PEM) <= 0 ) {
-        ERR_print_errors_fp(stderr);
-	exit(EXIT_FAILURE);
-    }
-
-    //Link the SSL variable to its context
-	ssl = SSL_new(ctx);
-
-	//Link the SSL variable to the socket
-    SSL_set_fd(ssl, socketFileDescriptor);
-
-	//Set SSL varibale to client mode
-  switch (endPointRole)
-  {
-    case CLIENT:
-      SSL_set_connect_state(ssl);
-      break;
-    case SERVER:
-      SSL_set_accept_state(ssl);
-      break;
-  }
-
+    if (SSL_CTX_use_PrivateKey_file(ctx, pk, SSL_FILETYPE_PEM) <= 0 )
+      return -1;
 
     return 0;
   }
 
+  int OpenSSLSecureEndPoint::setupCiphersuiteList()
+  {
+    std::string csl;
+
+    if (!cipherSuiteList.empty())
+    {
+      for (std::list<std::string>::iterator it=cipherSuiteList.begin(); it != cipherSuiteList.end(); ++it)
+      {
+        csl += *it + ':';
+      }
+
+      char cipherSuitesString[csl.size()+1];
+      csl.copy(cipherSuitesString,csl.size());
+      cipherSuitesString[csl.size()-1] = '\0';
+
+      if ( SSL_CTX_set_cipher_list(ctx,cipherSuitesString) == 1)
+        return 0;
+
+      return -1;
+    }
+
+    return 0;
+  }
+
+  int OpenSSLSecureEndPoint::setupRole()
+  {
+    ssl = SSL_new(ctx);
+
+    if (!ssl)
+      return -1;
+
+    if (SSL_set_fd(ssl, socketFileDescriptor) == 0)
+      return -1;
+
+    switch (endPointRole)
+    {
+      case CLIENT:
+        SSL_set_connect_state(ssl);
+        break;
+      case SERVER:
+        SSL_set_accept_state(ssl);
+        break;
+    }
+
+    return 0;
+  }
+
+  int OpenSSLSecureEndPoint::setup(){
+    setupProtocol();
+    setupVersion();
+    setupPeerVerification();
+    setupCredentials();
+    setupCiphersuiteList();
+    setupRole();
+    return 0;
+  }
 
   int OpenSSLSecureEndPoint::doHandshake()
   {
@@ -233,7 +255,5 @@ namespace TLSAbstractionLayer {
   {
     return SSL_read(ssl, msg, size);
   }
-
-
 
 } /* TLSAbstractionLayer */

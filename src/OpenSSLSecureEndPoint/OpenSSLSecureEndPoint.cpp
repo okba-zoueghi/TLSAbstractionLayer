@@ -19,6 +19,20 @@ namespace TLSAbstractionLayer {
                           ctx(NULL), ssl(NULL) {
                           }
 
+  OpenSSLSecureEndPoint::OpenSSLSecureEndPoint (const OpenSSLSecureEndPoint& opensslEndpoint):
+                          SecureEndPoint(opensslEndpoint.protocol,
+                                        opensslEndpoint.minProtocolVersion,
+                                        opensslEndpoint.maxProtocolVersion,
+                                        opensslEndpoint.endPointRole,
+                                        opensslEndpoint.verifyPeerCerificate,
+                                        opensslEndpoint.socketFileDescriptor,
+                                        opensslEndpoint.privateKeyPath,
+                                        opensslEndpoint.endPointCertPath,
+                                        opensslEndpoint.chainOfTrustCertPath,
+                                        opensslEndpoint.cipherSuiteList), ctx(NULL), ssl(NULL){
+
+                                        }
+
   OpenSSLSecureEndPoint::~OpenSSLSecureEndPoint(){
       SSL_CTX_free(ctx);
       SSL_free(ssl);

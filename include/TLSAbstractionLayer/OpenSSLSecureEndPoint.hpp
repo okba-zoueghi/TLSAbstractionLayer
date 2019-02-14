@@ -30,6 +30,8 @@ namespace TLSAbstractionLayer {
                           std::string cotcp,
                           std::list<std::string> csl);
 
+    OpenSSLSecureEndPoint (const OpenSSLSecureEndPoint&);
+
     ~OpenSSLSecureEndPoint ();
 
     int setup();

@@ -19,9 +19,10 @@ namespace TLSAbstractionLayer {
                           ctx(NULL), ssl(NULL) {
                           }
 
-  // OpenSSLSecureEndPoint::~OpenSSLSecureEndPoint(){
-  //   /* TODO */
-  // }
+  OpenSSLSecureEndPoint::~OpenSSLSecureEndPoint(){
+      SSL_CTX_free(ctx);
+      SSL_free(ssl);
+  }
 
   int OpenSSLSecureEndPoint::setup(){
 

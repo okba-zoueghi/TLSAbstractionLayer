@@ -30,7 +30,7 @@ namespace TLSAbstractionLayer {
                           std::string cotcp,
                           std::list<std::string> csl);
 
-    //virtual ~OpenSSLSecureEndPoint ();
+    ~OpenSSLSecureEndPoint ();
 
     int setup();
     int doHandshake();

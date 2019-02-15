@@ -232,12 +232,19 @@ namespace TLSAbstractionLayer {
   }
 
   int OpenSSLSecureEndPoint::setup(){
+
+    SSL_CTX_free(ctx);
+    ctx = NULL;
+    SSL_free(ssl);
+    ssl = NULL;
+
     setupProtocol();
     setupVersion();
     setupPeerVerification();
     setupCredentials();
     setupCiphersuiteList();
     setupRole();
+
     return 0;
   }
 

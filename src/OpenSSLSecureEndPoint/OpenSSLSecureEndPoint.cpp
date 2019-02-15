@@ -188,10 +188,11 @@ namespace TLSAbstractionLayer {
 
   int OpenSSLSecureEndPoint::setupCiphersuiteList()
   {
-    std::string csl;
 
     if (!cipherSuiteList.empty())
     {
+      std::string csl;
+
       for (std::list<std::string>::iterator it=cipherSuiteList.begin(); it != cipherSuiteList.end(); ++it)
       {
         csl += *it + ':';

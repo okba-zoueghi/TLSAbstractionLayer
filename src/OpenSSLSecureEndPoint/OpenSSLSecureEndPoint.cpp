@@ -241,12 +241,22 @@ namespace TLSAbstractionLayer {
     SSL_free(ssl);
     ssl = NULL;
 
-    setupProtocol();
-    setupVersion();
+    if (setupProtocol() != 0)
+      return -1;
+
+    if (setupVersion() != 0)
+      return -1;
+
     setupPeerVerification();
-    setupCredentials();
-    setupCiphersuiteList();
-    setupRole();
+
+    if (setupCredentials()!= 0)
+      return -1;
+
+    if (setupCiphersuiteList()!= 0)
+      return -1;
+
+    if (setupRole()!= 0)
+      return -1;
 
     return 0;
   }

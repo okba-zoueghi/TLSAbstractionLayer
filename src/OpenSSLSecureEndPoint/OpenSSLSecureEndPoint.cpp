@@ -36,7 +36,9 @@ namespace TLSAbstractionLayer {
       if (this != &opensslEndpoint)
       {
         SSL_CTX_free(ctx);
+        ctx = NULL;
         SSL_free(ssl);
+        ssl = NULL;
         protocol = opensslEndpoint.protocol;
         minProtocolVersion = opensslEndpoint.minProtocolVersion;
         maxProtocolVersion = opensslEndpoint.maxProtocolVersion;

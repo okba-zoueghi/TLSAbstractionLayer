@@ -15,6 +15,8 @@ namespace TLSAbstractionLayer
 
   enum ProtocolVersion { V_1_1 = 0, V_1_2, V_1_3 };
 
+  enum Error : std::uint8_t { ERROR_WANT_READ = 0, ERROR_WANT_WRITE, ERROR_READ_FAILED, ERROR_WRITE_FAILED};
+
   class SecureEndPoint
   {
 

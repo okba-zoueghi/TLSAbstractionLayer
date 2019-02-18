@@ -263,17 +263,64 @@ namespace TLSAbstractionLayer {
 
   int OpenSSLSecureEndPoint::doHandshake()
   {
-    return SSL_do_handshake(ssl);
+    int ret = SSL_do_handshake(ssl);
+
+    if (ret != 1)
+    {
+      switch (SSL_get_error(ssl,ret))
+      {
+        case SSL_ERROR_WANT_READ :
+          return Error::ERROR_WANT_READ;
+          break;
+        case SSL_ERROR_WANT_WRITE :
+          return Error::ERROR_WANT_WRITE;
+          break;
+      };
+      return HandshakeState::FAILED;
+    }
+    return HandshakeState::ESTABLISHED;
   }
 
   int OpenSSLSecureEndPoint::send(const char * msg, int size)
   {
-    return SSL_write(ssl, msg, size);
+    int ret = SSL_write(ssl, msg, size);
+
+    if (ret <= 0)
+    {
+      switch (SSL_get_error(ssl,ret))
+      {
+        case SSL_ERROR_WANT_READ :
+          return Error::ERROR_WANT_READ;
+          break;
+        case SSL_ERROR_WANT_WRITE :
+          return Error::ERROR_WANT_WRITE;
+          break;
+      };
+      return Error::ERROR_WRITE_FAILED;
+    }
+
+    return ret;
   }
 
   int OpenSSLSecureEndPoint::receive(char * msg, int size)
   {
-    return SSL_read(ssl, msg, size);
+    int ret = SSL_read(ssl, msg, size);
+
+    if (ret <= 0)
+    {
+      switch (SSL_get_error(ssl,ret))
+      {
+        case SSL_ERROR_WANT_READ :
+          return Error::ERROR_WANT_READ;
+          break;
+        case SSL_ERROR_WANT_WRITE :
+          return Error::ERROR_WANT_WRITE;
+          break;
+      };
+      return Error::ERROR_READ_FAILED;
+    }
+
+    return ret;
   }
 
 } /* TLSAbstractionLayer */

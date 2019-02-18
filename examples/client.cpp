@@ -66,14 +66,14 @@ int main(int argc, char **argv)
 
   int res = tlsClient.doHandshake();
 
-  if (res == 1) {
+  if (res == HandshakeState::ESTABLISHED) {
     printf("Handshake established\n");
     tlsClient.receive(msg,100);
     printf("message : %s\n",msg);
   }
-  else
+  else if(res == HandshakeState::FAILED)
   {
-    printf("error : %d\n",res );
+    printf("Handshake failed\n");
   }
     close(sock);
 

@@ -72,9 +72,11 @@ int main(int argc, char **argv)
       std::list<std::string> l;
       bool verifyPeerCerificate = true;
 
+      l.push_back(TLS_RSA_WITH_AES_128_CBC_SHA);
+
       OpenSSLSecureEndPoint tlsServer(Protocol::TLS,
                                         ProtocolVersion::V_1_1,
-                                        ProtocolVersion::V_1_3,
+                                        ProtocolVersion::V_1_2,
                                         EndPointRole::SERVER,
                                         verifyPeerCerificate,client_sock, pk, cert, cacert, l);
 

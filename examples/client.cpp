@@ -56,6 +56,18 @@ int main(int argc, char **argv)
   std::list<std::string> l;
   bool verifyPeerCerificate = true;
 
+   //TLS v1.1 ciphers
+   l.push_back(TLS_RSA_WITH_AES_128_CBC_SHA);
+
+   //TLS v1.2 ciphers
+   l.push_back(TLS_RSA_WITH_AES_256_GCM_SHA384);
+   l.push_back(TLS_RSA_WITH_AES_128_GCM_SHA256);
+   l.push_back(TLS_RSA_WITH_AES_256_CBC_SHA256);
+
+   //TLS v1.3 ciphers
+   l.push_back(TLS_AES_128_CCM_SHA256);
+   l.push_back(TLS_CHACHA20_POLY1305_SHA256);
+
   OpenSSLSecureEndPoint tlsClient(Protocol::TLS,
                                   ProtocolVersion::V_1_1,
                                   ProtocolVersion::V_1_3,

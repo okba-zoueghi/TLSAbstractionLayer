@@ -188,27 +188,57 @@ namespace TLSAbstractionLayer {
 
   int OpenSSLSecureEndPoint::setupCiphersuiteList()
   {
-
+    int ret = 0;
+    
     if (!cipherSuiteList.empty())
     {
       std::string csl;
+      std::string cslv1_3;
 
       for (std::list<std::string>::iterator it=cipherSuiteList.begin(); it != cipherSuiteList.end(); ++it)
       {
-        csl += *it + ':';
+        if (*it == TLS_AES_128_GCM_SHA256) {
+          cslv1_3 += *it + ':';
+        }
+        else if (*it == TLS_AES_256_GCM_SHA384) {
+          cslv1_3 += *it + ':';
+        }
+        else if (*it == TLS_CHACHA20_POLY1305_SHA256) {
+          cslv1_3 += *it + ':';
+        }
+        else if (*it == TLS_AES_128_CCM_SHA256) {
+          cslv1_3 += *it + ':';
+        }
+        else if (*it == TLS_AES_128_CCM_8_SHA256) {
+          cslv1_3 += *it + ':';
+        }
+        else{
+          csl += *it + ':';
+        }
       }
 
-      char cipherSuitesString[csl.size()+1];
-      csl.copy(cipherSuitesString,csl.size());
-      cipherSuitesString[csl.size()-1] = '\0';
+      if (!csl.empty())
+      {
+        char cipherSuitesString[csl.size()+1];
+        csl.copy(cipherSuitesString,csl.size());
+        cipherSuitesString[csl.size()-1] = '\0';
 
-      if ( SSL_CTX_set_cipher_list(ctx,cipherSuitesString) == 1)
-        return 0;
+        if ( SSL_CTX_set_cipher_list(ctx,cipherSuitesString) != 1)
+          ret = -1;
+      }
 
-      return -1;
+      if (!cslv1_3.empty())
+      {
+        char cipherSuitesString[cslv1_3.size()+1];
+        cslv1_3.copy(cipherSuitesString,cslv1_3.size());
+        cipherSuitesString[cslv1_3.size()-1] = '\0';
+
+        if ( SSL_CTX_set_ciphersuites(ctx,cipherSuitesString) != 1)
+          ret = -1;
+      }
     }
 
-    return 0;
+    return ret;
   }
 
   int OpenSSLSecureEndPoint::setupRole()

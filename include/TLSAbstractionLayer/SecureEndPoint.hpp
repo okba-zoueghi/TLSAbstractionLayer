@@ -11,7 +11,7 @@ namespace TLSAbstractionLayer
 
   enum Protocol : std::uint8_t { TLS = 0, DTLS  };
 
-  enum HandshakeState : std::uint8_t { ESTABLISHED = 0, NOTESTABLISHED, FAILED  };
+  enum HandshakeState : std::uint8_t { ESTABLISHED = 4, NOTESTABLISHED, FAILED  };
 
   enum ProtocolVersion { V_1_1 = 0, V_1_2, V_1_3 };
 

@@ -16,6 +16,8 @@ namespace TLSAbstractionLayer {
   private:
     SSL_CTX *ctx;
 	  SSL *ssl;
+    BIO *rbio;
+    BIO *wbio;
 
   public:
 
@@ -38,10 +40,13 @@ namespace TLSAbstractionLayer {
 
     ~OpenSSLSecureEndPoint ();
 
-    int setup();
+    int setupTLS();
+    int setupIO(IO);
     int doHandshake();
     int send(const char *, int);
     int receive(char *, int);
+    int writeToBuffer(const char *,int size, char **);
+    int readFromBuffer(const char *,int size,char **);
   private:
     int setupProtocol();
     int setupVersion();

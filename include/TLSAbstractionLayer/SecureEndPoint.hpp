@@ -17,6 +17,8 @@ namespace TLSAbstractionLayer
 
   enum Error : std::uint8_t { ERROR_WANT_READ = 0, ERROR_WANT_WRITE, ERROR_READ_FAILED, ERROR_WRITE_FAILED};
 
+  enum IO :std::uint8_t { SOCKET =0, BUFFER};
+
   class SecureEndPoint
   {
 
@@ -61,10 +63,13 @@ namespace TLSAbstractionLayer
     void setEndPointCertPath(const std::string&);
     void setChainOfTrustCertPath(const std::string&);
     void setCipherSuiteList(const std::list<std::string>&);
-    virtual int setup() = 0;
+    virtual int setupTLS() = 0;
+    virtual int setupIO(IO) = 0;
     virtual int doHandshake() = 0;
     virtual int send(const char *, int) = 0;
     virtual int receive(char *, int) = 0;
+    virtual int writeToBuffer(const char *,int size, char **) = 0;
+    virtual int readFromBuffer(const char *,int size,char **) = 0;
   };
 
 } /* TLSAbstractionLayer */

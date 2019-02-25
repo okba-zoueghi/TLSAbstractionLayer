@@ -74,14 +74,37 @@ int main(int argc, char **argv)
                                   EndPointRole::CLIENT,
                                   verifyPeerCerificate,sock, pk, cert, cacert, l);
 
-  tlsClient.setup();
+  int s = tlsClient.setupTLS();
+  if (s == -1) {
+    printf("TLS setup failed\n");
+    return -1;
+  }
+
+  s = tlsClient.setupIO(SOCKET);
+  if (s == -1) {
+    printf("IO setup failed\n");
+    return -1;
+  }
 
   int res = tlsClient.doHandshake();
 
+  s = tlsClient.setupIO(BUFFER);
+  if (s == -1) {
+    printf("IO setup failed\n");
+    return -1;
+  }
+
   if (res == HandshakeState::ESTABLISHED) {
     printf("Handshake established\n");
-    tlsClient.receive(msg,100);
-    printf("message : %s\n",msg);
+    char encMsg[1000];
+    int ret = recv(sock,encMsg,1000,0);
+    printf("Received --> encMsg : %s, encMsgSize : %d\n",encMsg,ret);
+
+    char * clearMsg;
+    ret = tlsClient.readFromBuffer(encMsg,ret,&clearMsg);
+
+    //tlsClient.receive(msg,100);
+    printf("Decrypted message --> clearMsg : %s, clearMsgsize : %d\n",clearMsg,ret);
   }
   else if(res == HandshakeState::FAILED)
   {

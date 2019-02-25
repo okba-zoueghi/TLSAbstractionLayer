@@ -16,7 +16,7 @@ namespace TLSAbstractionLayer {
                           std::string cotcp,
                           std::list<std::string> csl) :
                           SecureEndPoint(p, minV, maxV, epr, b, sockfd, pkp, epcp, cotcp, csl),
-                          ctx(NULL), ssl(NULL) {
+                          ctx(NULL), ssl(NULL), rbio(NULL), wbio(NULL) {
                           }
 
   OpenSSLSecureEndPoint::OpenSSLSecureEndPoint (const OpenSSLSecureEndPoint& opensslEndpoint):
@@ -29,7 +29,7 @@ namespace TLSAbstractionLayer {
                                         opensslEndpoint.privateKeyPath,
                                         opensslEndpoint.endPointCertPath,
                                         opensslEndpoint.chainOfTrustCertPath,
-                                        opensslEndpoint.cipherSuiteList), ctx(NULL), ssl(NULL){
+                                        opensslEndpoint.cipherSuiteList), ctx(NULL), ssl(NULL), rbio(NULL), wbio(NULL){
 
                                         }
   OpenSSLSecureEndPoint& OpenSSLSecureEndPoint::operator=(const OpenSSLSecureEndPoint& opensslEndpoint){
@@ -189,7 +189,7 @@ namespace TLSAbstractionLayer {
   int OpenSSLSecureEndPoint::setupCiphersuiteList()
   {
     int ret = 0;
-    
+
     if (!cipherSuiteList.empty())
     {
       std::string csl;
@@ -248,9 +248,6 @@ namespace TLSAbstractionLayer {
     if (!ssl)
       return -1;
 
-    if (SSL_set_fd(ssl, socketFileDescriptor) == 0)
-      return -1;
-
     switch (endPointRole)
     {
       case CLIENT:
@@ -264,7 +261,7 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
-  int OpenSSLSecureEndPoint::setup(){
+  int OpenSSLSecureEndPoint::setupTLS(){
 
     SSL_CTX_free(ctx);
     ctx = NULL;
@@ -287,6 +284,27 @@ namespace TLSAbstractionLayer {
 
     if (setupRole()!= 0)
       return -1;
+
+    return 0;
+  }
+
+  int OpenSSLSecureEndPoint::setupIO(IO io)
+  {
+    if (io == SOCKET) {
+      if (SSL_set_fd(ssl, socketFileDescriptor) == 0)
+        return -1;
+    }
+    else if(io == BUFFER)
+    {
+      rbio = BIO_new(BIO_s_mem());
+      wbio = BIO_new(BIO_s_mem());
+
+      if (wbio == NULL || rbio == NULL) {
+        return -1;
+      }
+
+      SSL_set_bio(ssl,rbio,wbio);
+    }
 
     return 0;
   }
@@ -348,6 +366,56 @@ namespace TLSAbstractionLayer {
           break;
       };
       return Error::ERROR_READ_FAILED;
+    }
+
+    return ret;
+  }
+
+  int OpenSSLSecureEndPoint::writeToBuffer(const char *clearMsg,int clearMsgsize,char ** encMsg)
+  {
+    int ret = SSL_write(ssl,clearMsg,clearMsgsize);
+    if (ret < 0) {
+      return -1;
+    }
+
+    char * buff;
+    size_t encMsgSize = 0;
+    encMsgSize = BIO_get_mem_data(wbio,&buff);
+    if (encMsgSize <= 0) {
+      return -1;
+    }
+
+    (*encMsg) = NULL;
+    (*encMsg) = new char[encMsgSize];
+    if ((*encMsg) == NULL) {
+      return -1;
+    }
+
+    ret = BIO_read(wbio,(*encMsg),encMsgSize);
+    if (ret <= 0) {
+      return -1;
+    }
+
+    return ret;
+  }
+
+  int OpenSSLSecureEndPoint::readFromBuffer(const char * encMsg, int encMsgsize, char **clearMsg)
+  {
+
+    int ret = BIO_write(rbio,encMsg,encMsgsize);
+    if (ret <= 0) {
+      return -1;
+    }
+
+    (*clearMsg) = NULL;
+    (*clearMsg) = new char[encMsgsize];
+    if ((*clearMsg) == NULL) {
+      return -1;
+    }
+
+    ret = SSL_read(ssl,(*clearMsg),encMsgsize);
+    if (ret <= 0) {
+      return -1;
     }
 
     return ret;

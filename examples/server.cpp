@@ -9,7 +9,7 @@
 #define CERTIFICATE_PATH			     "./ca/intermediate/certs/server.cert.pem"
 #define PRIVATE_KEY_PATH 			     "./ca/intermediate/private/server.key.pem"
 #define CHAIN_OF_TRUST_CERT_PATH	 "./ca/intermediate/certs/ca-chain.cert.pem"
-#define MSG 						           "Hello world\n"
+#define MSG 						           "Hello world"
 
 using namespace TLSAbstractionLayer;
 
@@ -80,12 +80,38 @@ int main(int argc, char **argv)
                                         EndPointRole::SERVER,
                                         verifyPeerCerificate,client_sock, pk, cert, cacert, l);
 
-      tlsServer.setup();
+      int s = tlsServer.setupTLS();
+      if (s == -1) {
+        printf("TLS setup failed\n");
+        return -1;
+      }
+
+      s = tlsServer.setupIO(SOCKET);
+      if (s == -1) {
+        printf("IO setup failed\n");
+        return -1;
+      }
 
       int res = tlsServer.doHandshake();
 
-      tlsServer.send(MSG,sizeof(MSG));
+      s = tlsServer.setupIO(BUFFER);
+      if (s == -1) {
+        printf("IO setup failed\n");
+        return -1;
+      }
 
+      if (res == HandshakeState::ESTABLISHED) {
+        printf("Plain text message  --> clearMsg : %s, clearMsgsize: %d\n",MSG,sizeof(MSG));
+
+        char * encMsg;
+        int ret = tlsServer.writeToBuffer(MSG,sizeof(MSG),&encMsg);
+        printf("Encrypted message --> encMsg :%s, size: %d\n",encMsg,ret);
+        send(client_sock,encMsg,ret,0);
+      }
+      else if(res == HandshakeState::FAILED)
+      {
+        printf("Handshake failed\n");
+      }
       close(client_sock);
 		  printf("Connection closed\n");
     }

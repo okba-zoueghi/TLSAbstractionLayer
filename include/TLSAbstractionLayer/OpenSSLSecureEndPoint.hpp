@@ -9,6 +9,8 @@
 #include <openssl/err.h>
 #include <iostream>
 
+#define TLS_DEBUG 1
+
 namespace TLSAbstractionLayer {
 
   class OpenSSLSecureEndPoint : public SecureEndPoint{
@@ -50,7 +52,7 @@ namespace TLSAbstractionLayer {
   private:
     int setupProtocol();
     int setupVersion();
-    void setupPeerVerification();
+    int setupPeerVerification();
     int setupCredentials();
     int setupCiphersuiteList();
     int setupRole();

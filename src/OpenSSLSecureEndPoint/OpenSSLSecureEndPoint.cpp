@@ -1,5 +1,13 @@
 #include <TLSAbstractionLayer/OpenSSLSecureEndPoint.hpp>
 
+#if TLS_DEBUG == 1
+#define TLS_LOG_INFO(x) std::cout << "[TLS INFO] : " << x << "\n"
+#define TLS_LOG_ERROR(x) std::cout << "[TLS ERROR] : " << x << "\n";ERR_print_errors_fp(stderr)
+#else
+#define TLS_LOG_INFO(x)
+#define TLS_LOG_ERROR(x)
+#endif
+
 namespace TLSAbstractionLayer {
 
   OpenSSLSecureEndPoint::OpenSSLSecureEndPoint(): ctx(NULL), ssl(NULL) {
@@ -70,10 +78,15 @@ namespace TLSAbstractionLayer {
       case DTLS:
         method = DTLS_method();
         break;
+
+      default:
+        TLS_LOG_ERROR("Protocol doesn't match");
+        return -1;
     }
 
     if(!method)
       {
+        TLS_LOG_ERROR("TLS_method() failed");
         return -1;
       }
 
@@ -81,9 +94,11 @@ namespace TLSAbstractionLayer {
 
     if(!ctx)
     {
+      TLS_LOG_ERROR("SSL_CTX_new() failed");
       return -1;
     }
 
+    TLS_LOG_INFO("Setup protocol OK");
     return 0;
   }
 
@@ -108,10 +123,18 @@ namespace TLSAbstractionLayer {
       }
 
       if (minVersion == -1)
+      {
+        TLS_LOG_ERROR("minimum protocol version doesn't match");
         return -1;
+      }
+
 
       if(SSL_CTX_set_min_proto_version(ctx,minVersion) == 0)
+      {
+        TLS_LOG_ERROR("setting minimum protocol version failed");
         return -1;
+      }
+
 
       switch (maxProtocolVersion)
       {
@@ -127,21 +150,31 @@ namespace TLSAbstractionLayer {
       }
 
       if (maxVersion == -1)
+      {
+        TLS_LOG_ERROR("Maximum protocol version doesn't match");
         return -1;
+      }
+
 
       if(SSL_CTX_set_max_proto_version(ctx,maxVersion) == 0)
+      {
+        TLS_LOG_ERROR("setting maximum protocol version failed");
         return -1;
+      }
+
     }
     else
     {
       /* DTLS TODO */
+      TLS_LOG_ERROR("Unknown protcol");
       return -1;
     }
 
+    TLS_LOG_INFO("Setup version OK");
     return 0;
   }
 
-  void OpenSSLSecureEndPoint::setupPeerVerification(){
+  int OpenSSLSecureEndPoint::setupPeerVerification(){
 
     if (verifyPeerCerificate)
     {
@@ -153,16 +186,28 @@ namespace TLSAbstractionLayer {
         case SERVER:
           SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL);
           break;
+
+        default:
+          TLS_LOG_ERROR("Endpoint role unknown");
+          return -1;
       }
     }
     else
     {
       SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
     }
+
+    TLS_LOG_INFO("Peer verification setup OK");
+    return 0;
   }
 
   int OpenSSLSecureEndPoint::setupCredentials()
   {
+    if (privateKeyPath.empty() || endPointCertPath.empty() || chainOfTrustCertPath.empty()) {
+      TLS_LOG_ERROR("Setup credentials string empty");
+      return -1;
+    }
+
     char pk[privateKeyPath.size()+1];
     char cert[endPointCertPath.size()+1];
     char cacert[chainOfTrustCertPath.size()+1];
@@ -175,13 +220,28 @@ namespace TLSAbstractionLayer {
     cacert[chainOfTrustCertPath.size()] = '\0';
 
     if (SSL_CTX_load_verify_locations(ctx, cacert, NULL) != 1)
+    {
+      TLS_LOG_ERROR("Loading chain of trust certificate failed");
       return -1;
+    }
+
+    TLS_LOG_INFO("Loaded chain of trust certificate");
 
     if (SSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) <= 0)
+    {
+      TLS_LOG_ERROR("Loading endpoint's certificate failed");
       return -1;
+    }
+
+    TLS_LOG_INFO("Loaded endpoint's certificate");
 
     if (SSL_CTX_use_PrivateKey_file(ctx, pk, SSL_FILETYPE_PEM) <= 0 )
+    {
+      TLS_LOG_ERROR("Loading endpoint's private key failed");
       return -1;
+    }
+
+    TLS_LOG_INFO("Loaded endpoint's private key");
 
     return 0;
   }
@@ -224,7 +284,11 @@ namespace TLSAbstractionLayer {
         cipherSuitesString[csl.size()-1] = '\0';
 
         if ( SSL_CTX_set_cipher_list(ctx,cipherSuitesString) != 1)
+        {
+          TLS_LOG_ERROR("Setting TLS v1.1 and v1.2 cipher suites failed");
           ret = -1;
+        }
+
       }
 
       if (!cslv1_3.empty())
@@ -234,8 +298,13 @@ namespace TLSAbstractionLayer {
         cipherSuitesString[cslv1_3.size()-1] = '\0';
 
         if ( SSL_CTX_set_ciphersuites(ctx,cipherSuitesString) != 1)
+        {
+          TLS_LOG_ERROR("Setting TLS v1.3 cipher suites failed");
           ret = -1;
+        }
       }
+
+      TLS_LOG_INFO("Cipher suites configured");
     }
 
     return ret;
@@ -246,7 +315,11 @@ namespace TLSAbstractionLayer {
     ssl = SSL_new(ctx);
 
     if (!ssl)
+    {
+      TLS_LOG_ERROR("SSL_new() failed");
       return -1;
+    }
+
 
     switch (endPointRole)
     {
@@ -256,6 +329,10 @@ namespace TLSAbstractionLayer {
       case SERVER:
         SSL_set_accept_state(ssl);
         break;
+
+      default:
+       TLS_LOG_ERROR("Endpoint role unknown");
+       return -1;
     }
 
     return 0;
@@ -274,7 +351,8 @@ namespace TLSAbstractionLayer {
     if (setupVersion() != 0)
       return -1;
 
-    setupPeerVerification();
+    if (setupPeerVerification() != 0)
+      return -1;
 
     if (setupCredentials()!= 0)
       return -1;
@@ -285,14 +363,23 @@ namespace TLSAbstractionLayer {
     if (setupRole()!= 0)
       return -1;
 
+    TLS_LOG_INFO("TLS setup OK");
     return 0;
   }
 
   int OpenSSLSecureEndPoint::setupIO(IO io)
   {
     if (io == SOCKET) {
-      if (SSL_set_fd(ssl, socketFileDescriptor) == 0)
+      if (socketFileDescriptor <= 0) {
+        TLS_LOG_ERROR("Invalid socket file descriptor");
         return -1;
+      }
+      if (SSL_set_fd(ssl, socketFileDescriptor) == 0)
+      {
+        TLS_LOG_ERROR("Failed to set socket file descriptor");
+        return -1;
+      }
+      TLS_LOG_INFO("Set socket file descriptor OK");
     }
     else if(io == BUFFER)
     {
@@ -300,10 +387,16 @@ namespace TLSAbstractionLayer {
       wbio = BIO_new(BIO_s_mem());
 
       if (wbio == NULL || rbio == NULL) {
+        TLS_LOG_ERROR("Failed to allocate memory BIOs");
         return -1;
       }
 
       SSL_set_bio(ssl,rbio,wbio);
+    }
+    else
+    {
+      TLS_LOG_ERROR("IO unknown");
+      return -1;
     }
 
     return 0;
@@ -323,9 +416,14 @@ namespace TLSAbstractionLayer {
         case SSL_ERROR_WANT_WRITE :
           return Error::ERROR_WANT_WRITE;
           break;
+
+        default:
+          TLS_LOG_ERROR("Handshake FAILED");
+          return HandshakeState::FAILED;
       };
-      return HandshakeState::FAILED;
     }
+
+    TLS_LOG_INFO("Handshake ESTABLISHED");
     return HandshakeState::ESTABLISHED;
   }
 
@@ -343,10 +441,15 @@ namespace TLSAbstractionLayer {
         case SSL_ERROR_WANT_WRITE :
           return Error::ERROR_WANT_WRITE;
           break;
+
+        default:
+          TLS_LOG_ERROR("SSL_write FAILED");
+          return Error::ERROR_WRITE_FAILED;
       };
-      return Error::ERROR_WRITE_FAILED;
+
     }
 
+    TLS_LOG_INFO("Message sent");
     return ret;
   }
 
@@ -364,10 +467,14 @@ namespace TLSAbstractionLayer {
         case SSL_ERROR_WANT_WRITE :
           return Error::ERROR_WANT_WRITE;
           break;
+
+        default:
+          TLS_LOG_ERROR("SSL_read FAILED");
+          return Error::ERROR_READ_FAILED;
       };
-      return Error::ERROR_READ_FAILED;
     }
 
+    TLS_LOG_INFO("Message received");
     return ret;
   }
 
@@ -375,6 +482,7 @@ namespace TLSAbstractionLayer {
   {
     int ret = SSL_write(ssl,clearMsg,clearMsgsize);
     if (ret < 0) {
+      TLS_LOG_ERROR("SSL_write FAILED");
       return -1;
     }
 
@@ -382,20 +490,24 @@ namespace TLSAbstractionLayer {
     size_t encMsgSize = 0;
     encMsgSize = BIO_get_mem_data(wbio,&buff);
     if (encMsgSize <= 0) {
+      TLS_LOG_ERROR("BIO_get_mem_data FAILED");
       return -1;
     }
 
     (*encMsg) = NULL;
     (*encMsg) = new char[encMsgSize];
     if ((*encMsg) == NULL) {
+      TLS_LOG_ERROR("Allocating memory to store encrypted message FAILED");
       return -1;
     }
 
     ret = BIO_read(wbio,(*encMsg),encMsgSize);
     if (ret <= 0) {
+      TLS_LOG_ERROR("BIO_read FAILED");
       return -1;
     }
 
+    TLS_LOG_INFO("Message encypted");
     return ret;
   }
 
@@ -404,20 +516,24 @@ namespace TLSAbstractionLayer {
 
     int ret = BIO_write(rbio,encMsg,encMsgsize);
     if (ret <= 0) {
+      TLS_LOG_ERROR("BIO_write FAILED");
       return -1;
     }
 
     (*clearMsg) = NULL;
     (*clearMsg) = new char[encMsgsize];
     if ((*clearMsg) == NULL) {
+      TLS_LOG_ERROR("Allocating memory to store plain text message FAILED");
       return -1;
     }
 
     ret = SSL_read(ssl,(*clearMsg),encMsgsize);
     if (ret <= 0) {
+      TLS_LOG_ERROR("SSL_read FAILED");
       return -1;
     }
 
+    TLS_LOG_INFO("Message decrypted");
     return ret;
   }
 

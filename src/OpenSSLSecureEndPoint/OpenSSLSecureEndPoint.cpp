@@ -482,11 +482,19 @@ namespace TLSAbstractionLayer {
     {
       int ret = 0;
       BIO_ADDR * clientAddr = BIO_ADDR_new();
+
+      if (clientAddr == 0)
+      {
+        TLS_LOG_ERROR("Failed to allocate memory for client address (DTLSv1_listen)");
+        return HandshakeState::FAILED;
+      }
+
       do
       {
         ret = DTLSv1_listen(ssl, clientAddr);
       }
       while (ret == 0);
+      BIO_ADDR_free(clientAddr);
 
       if (ret < 0)
         return HandshakeState::FAILED;

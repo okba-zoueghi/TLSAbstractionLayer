@@ -140,14 +140,11 @@ namespace TLSAbstractionLayer {
         case V_1_3:
           minVersion = TLS1_3_VERSION;
           break;
-      }
 
-      if (minVersion == -1)
-      {
-        TLS_LOG_ERROR("minimum protocol version doesn't match");
-        return -1;
+        default:
+          TLS_LOG_ERROR("minimum protocol version doesn't match");
+          return -1;
       }
-
 
       if(SSL_CTX_set_min_proto_version(ctx,minVersion) == 0)
       {
@@ -167,14 +164,11 @@ namespace TLSAbstractionLayer {
         case V_1_3:
           maxVersion = TLS1_3_VERSION;
           break;
-      }
 
-      if (maxVersion == -1)
-      {
-        TLS_LOG_ERROR("Maximum protocol version doesn't match");
-        return -1;
+        default:
+          TLS_LOG_ERROR("Maximum protocol version doesn't match");
+          return -1;
       }
-
 
       if(SSL_CTX_set_max_proto_version(ctx,maxVersion) == 0)
       {
@@ -185,9 +179,45 @@ namespace TLSAbstractionLayer {
     }
     else
     {
-      /* DTLS TODO */
-      TLS_LOG_ERROR("Unknown protcol");
-      return -1;
+      switch (minProtocolVersion)
+      {
+        case V_1_1:
+          minVersion = DTLS1_VERSION;
+          break;
+        case V_1_2:
+          minVersion = DTLS1_2_VERSION;
+          break;
+
+        default:
+          TLS_LOG_ERROR("minimum protocol version doesn't match");
+          return -1;
+      }
+
+      if(SSL_CTX_set_min_proto_version(ctx,minVersion) == 0)
+      {
+        TLS_LOG_ERROR("setting minimum protocol version failed");
+        return -1;
+      }
+
+      switch (maxProtocolVersion)
+      {
+        case V_1_1:
+          maxVersion = DTLS1_VERSION;
+          break;
+        case V_1_2:
+          maxVersion = DTLS1_2_VERSION;
+          break;
+
+        default:
+          TLS_LOG_ERROR("maximum protocol version doesn't match");
+          return -1;
+      }
+
+      if(SSL_CTX_set_max_proto_version(ctx,maxVersion) == 0)
+      {
+        TLS_LOG_ERROR("setting maximum protocol version failed");
+        return -1;
+      }
     }
 
     TLS_LOG_INFO("Setup version OK");

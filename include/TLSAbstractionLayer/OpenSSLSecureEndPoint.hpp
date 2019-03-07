@@ -7,9 +7,12 @@
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/rand.h>
 #include <iostream>
 
 #define TLS_DEBUG 1
+
+#define DTLS_COOKIE_SECRET_LENGTH 20
 
 namespace TLSAbstractionLayer {
 
@@ -20,6 +23,11 @@ namespace TLSAbstractionLayer {
 	  SSL *ssl;
     BIO *rbio;
     BIO *wbio;
+
+  private:
+    static std::uint8_t cookie_lenght;
+    static std::uint8_t cookie_secret[DTLS_COOKIE_SECRET_LENGTH];
+    static bool cookie_secret_intialized;
 
   public:
 
@@ -49,6 +57,7 @@ namespace TLSAbstractionLayer {
     int receive(char *, int);
     int writeToBuffer(const char *,int size, char **);
     int readFromBuffer(const char *,int size,char **);
+    int initializeDTLSCookies();
   private:
     int setupProtocol();
     int setupVersion();

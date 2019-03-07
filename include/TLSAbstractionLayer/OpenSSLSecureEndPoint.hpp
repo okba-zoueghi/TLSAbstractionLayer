@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <iostream>
+#include <mutex>
 
 #define TLS_DEBUG 1
 
@@ -32,6 +33,7 @@ namespace TLSAbstractionLayer {
     static std::uint8_t cookie_lenght;
     static std::uint8_t cookie_secret[DTLS_COOKIE_SECRET_LENGTH];
     static bool cookie_secret_intialized;
+    static std::mutex cookieGenerationMutex;
 
   public:
 

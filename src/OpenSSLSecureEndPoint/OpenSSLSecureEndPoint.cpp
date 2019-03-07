@@ -30,7 +30,8 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
-  OpenSSLSecureEndPoint::OpenSSLSecureEndPoint(): ctx(NULL), ssl(NULL) {
+  OpenSSLSecureEndPoint::OpenSSLSecureEndPoint(): ctx(NULL), ssl(NULL), rbio(NULL),
+  wbio(NULL), DTLSCookieSent(false) {
   }
 
   OpenSSLSecureEndPoint::OpenSSLSecureEndPoint (Protocol p,
@@ -44,7 +45,7 @@ namespace TLSAbstractionLayer {
                           std::string cotcp,
                           std::list<std::string> csl) :
                           SecureEndPoint(p, minV, maxV, epr, b, sockfd, pkp, epcp, cotcp, csl),
-                          ctx(NULL), ssl(NULL), rbio(NULL), wbio(NULL) {
+                          ctx(NULL), ssl(NULL), rbio(NULL), wbio(NULL), DTLSCookieSent(false) {
                           }
 
   OpenSSLSecureEndPoint::OpenSSLSecureEndPoint (const OpenSSLSecureEndPoint& opensslEndpoint):
@@ -57,7 +58,9 @@ namespace TLSAbstractionLayer {
                                         opensslEndpoint.privateKeyPath,
                                         opensslEndpoint.endPointCertPath,
                                         opensslEndpoint.chainOfTrustCertPath,
-                                        opensslEndpoint.cipherSuiteList), ctx(NULL), ssl(NULL), rbio(NULL), wbio(NULL){
+                                        opensslEndpoint.cipherSuiteList),
+                                        ctx(NULL), ssl(NULL), rbio(NULL),
+                                        wbio(NULL), DTLSCookieSent(false){
 
                                         }
   OpenSSLSecureEndPoint& OpenSSLSecureEndPoint::operator=(const OpenSSLSecureEndPoint& opensslEndpoint){
@@ -67,6 +70,7 @@ namespace TLSAbstractionLayer {
         ctx = NULL;
         SSL_free(ssl);
         ssl = NULL;
+        DTLSCookieSent = false;
         protocol = opensslEndpoint.protocol;
         minProtocolVersion = opensslEndpoint.minProtocolVersion;
         maxProtocolVersion = opensslEndpoint.maxProtocolVersion;
@@ -470,6 +474,23 @@ namespace TLSAbstractionLayer {
 
   int OpenSSLSecureEndPoint::doHandshake()
   {
+    if ( (protocol == DTLS) && (endPointRole == SERVER) && !DTLSCookieSent )
+    {
+      int ret = 0;
+      BIO_ADDR * clientAddr = BIO_ADDR_new();
+      do
+      {
+        ret = DTLSv1_listen(ssl, clientAddr);
+      }
+      while (ret == 0);
+
+      if (ret < 0)
+        return HandshakeState::FAILED;
+
+      TLS_LOG_INFO("Client Hello received and cookie sent");
+      DTLSCookieSent = true;
+    }
+
     int ret = SSL_do_handshake(ssl);
 
     if (ret != 1)

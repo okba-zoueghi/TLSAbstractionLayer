@@ -26,6 +26,7 @@ namespace TLSAbstractionLayer {
 	  SSL *ssl;
     BIO *rbio;
     BIO *wbio;
+    bool DTLSCookieSent;
 
   private:
     static std::uint8_t cookie_lenght;
@@ -60,12 +61,12 @@ namespace TLSAbstractionLayer {
     int receive(char *, int);
     int writeToBuffer(const char *,int size, char **);
     int readFromBuffer(const char *,int size,char **);
-    int initializeDTLSCookies();
   private:
     int setupProtocol();
     int setupVersion();
     int setupPeerVerification();
     int setupCredentials();
+    int initializeDTLSCookies();
     int setupDTLSCookies();
     int setupCiphersuiteList();
     int setupRole();

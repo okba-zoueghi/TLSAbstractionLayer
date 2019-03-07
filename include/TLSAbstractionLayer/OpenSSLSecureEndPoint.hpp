@@ -69,6 +69,7 @@ namespace TLSAbstractionLayer {
     int setupCiphersuiteList();
     int setupRole();
     static int generate_cookie(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len);
+    static int verify_cookie(SSL *ssl, const unsigned char *cookie, unsigned int cookie_len);
   };
 
 } /* TLSAbstractionLayer */

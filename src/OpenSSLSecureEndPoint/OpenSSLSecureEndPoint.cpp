@@ -10,6 +10,26 @@
 
 namespace TLSAbstractionLayer {
 
+  bool OpenSSLSecureEndPoint::cookie_secret_intialized = false;
+  std::uint8_t OpenSSLSecureEndPoint::cookie_lenght = DTLS_COOKIE_SECRET_LENGTH;
+  std::uint8_t OpenSSLSecureEndPoint::cookie_secret[DTLS_COOKIE_SECRET_LENGTH] = {0};
+
+  int OpenSSLSecureEndPoint::initializeDTLSCookies()
+  {
+    if(cookie_secret_intialized)
+      return 0;
+
+    if (!RAND_bytes(OpenSSLSecureEndPoint::cookie_secret,OpenSSLSecureEndPoint::cookie_lenght))
+    {
+      TLS_LOG_ERROR("Failed to generate secret DTLS cookie");
+      return -1;
+    }
+
+    cookie_secret_intialized = true;
+    TLS_LOG_INFO("DTLS secret cookie generated");
+    return 0;
+  }
+
   OpenSSLSecureEndPoint::OpenSSLSecureEndPoint(): ctx(NULL), ssl(NULL) {
   }
 

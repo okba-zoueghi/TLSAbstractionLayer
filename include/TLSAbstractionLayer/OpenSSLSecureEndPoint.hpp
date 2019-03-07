@@ -66,6 +66,7 @@ namespace TLSAbstractionLayer {
     int setupVersion();
     int setupPeerVerification();
     int setupCredentials();
+    int setupDTLSCookies();
     int setupCiphersuiteList();
     int setupRole();
     static int generate_cookie(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len);

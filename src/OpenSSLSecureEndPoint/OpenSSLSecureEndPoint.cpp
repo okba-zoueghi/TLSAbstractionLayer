@@ -360,6 +360,19 @@ namespace TLSAbstractionLayer {
     return ret;
   }
 
+  int OpenSSLSecureEndPoint::setupDTLSCookies()
+  {
+    SSL_CTX_set_cookie_generate_cb(ctx, generate_cookie);
+    SSL_CTX_set_cookie_verify_cb(ctx, verify_cookie);
+    SSL_CTX_set_options(ctx, SSL_OP_COOKIE_EXCHANGE);
+
+    if(initializeDTLSCookies() != 0)
+      return -1;
+
+    TLS_LOG_INFO("Setup DTLS cookies OK");
+    return 0;
+  }
+
   int OpenSSLSecureEndPoint::setupRole()
   {
     ssl = SSL_new(ctx);
@@ -405,6 +418,9 @@ namespace TLSAbstractionLayer {
       return -1;
 
     if (setupCredentials()!= 0)
+      return -1;
+
+    if ( (protocol == DTLS) && (setupDTLSCookies() != 0) )
       return -1;
 
     if (setupCiphersuiteList()!= 0)

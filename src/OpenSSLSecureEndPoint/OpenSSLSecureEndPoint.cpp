@@ -557,4 +557,74 @@ namespace TLSAbstractionLayer {
     return ret;
   }
 
+  int OpenSSLSecureEndPoint::generate_cookie(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len)
+	{
+  	unsigned char *buffer, result[EVP_MAX_MD_SIZE];
+  	unsigned int length = 0, resultlength;
+  	union {
+  		struct sockaddr_storage ss;
+  		struct sockaddr_in6 s6;
+  		struct sockaddr_in s4;
+  	} peer;
+
+  	/* Read peer information */
+    socklen_t n = sizeof( peer );
+    int socket = SSL_get_fd(ssl);
+    getpeername(socket, (struct sockaddr *) &peer, &n);
+
+  	/* Create buffer with peer's address and port */
+  	length = 0;
+  	switch (peer.ss.ss_family) {
+  		case AF_INET:
+  			length += sizeof(struct in_addr);
+  			break;
+  		case AF_INET6:
+  			length += sizeof(struct in6_addr);
+  			break;
+  		default:
+  			OPENSSL_assert(0);
+  			break;
+  	}
+  	length += sizeof(in_port_t);
+  	buffer = (unsigned char*) OPENSSL_malloc(length);
+
+  	if (buffer == NULL)
+  		{
+  		printf("out of memory\n");
+  		return 0;
+  		}
+
+  	switch (peer.ss.ss_family) {
+  		case AF_INET:
+  			memcpy(buffer,
+  			       &peer.s4.sin_port,
+  			       sizeof(in_port_t));
+  			memcpy(buffer + sizeof(peer.s4.sin_port),
+  			       &peer.s4.sin_addr,
+  			       sizeof(struct in_addr));
+  			break;
+  		case AF_INET6:
+  			memcpy(buffer,
+  			       &peer.s6.sin6_port,
+  			       sizeof(in_port_t));
+  			memcpy(buffer + sizeof(in_port_t),
+  			       &peer.s6.sin6_addr,
+  			       sizeof(struct in6_addr));
+  			break;
+  		default:
+  			OPENSSL_assert(0);
+  			break;
+  	}
+
+  	/* Calculate HMAC of buffer using the secret */
+  	HMAC(EVP_sha1(), (const void*) cookie_secret, cookie_lenght,
+  	     (const unsigned char*) buffer, length, result, &resultlength);
+  	OPENSSL_free(buffer);
+
+  	memcpy(cookie, result, resultlength);
+  	*cookie_len = resultlength;
+
+  	return 1;
+  }
+
 } /* TLSAbstractionLayer */

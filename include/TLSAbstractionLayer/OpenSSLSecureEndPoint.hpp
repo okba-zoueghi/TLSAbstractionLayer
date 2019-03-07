@@ -8,6 +8,9 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <string.h>
 #include <iostream>
 
 #define TLS_DEBUG 1
@@ -65,6 +68,7 @@ namespace TLSAbstractionLayer {
     int setupCredentials();
     int setupCiphersuiteList();
     int setupRole();
+    static int generate_cookie(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len);
   };
 
 } /* TLSAbstractionLayer */

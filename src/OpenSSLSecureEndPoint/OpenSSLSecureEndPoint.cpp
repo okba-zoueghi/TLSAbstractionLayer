@@ -318,17 +318,14 @@ namespace TLSAbstractionLayer {
 
   int OpenSSLSecureEndPoint::setupCredentials()
   {
-    if (privateKeyPath.empty() || endPointCertPath.empty() || chainOfTrustCertPath.empty()) {
+    if (endPointCertPath.empty() || chainOfTrustCertPath.empty()) {
       TLS_LOG_ERROR("Setup credentials string empty");
       return -1;
     }
 
-    char pk[privateKeyPath.size()+1];
     char cert[endPointCertPath.size()+1];
     char cacert[chainOfTrustCertPath.size()+1];
 
-    privateKeyPath.copy(pk,privateKeyPath.size()+1);
-    pk[privateKeyPath.size()] = '\0';
     endPointCertPath.copy(cert,endPointCertPath.size()+1);
     cert[endPointCertPath.size()] = '\0';
     chainOfTrustCertPath.copy(cacert,chainOfTrustCertPath.size()+1);
@@ -350,14 +347,60 @@ namespace TLSAbstractionLayer {
 
     TLS_LOG_INFO("Loaded endpoint's certificate");
 
-    if (SSL_CTX_use_PrivateKey_file(ctx, pk, SSL_FILETYPE_PEM) <= 0 )
+    if (privateKeySource == FROM_FILE)
     {
-      TLS_LOG_ERROR("Loading endpoint's private key failed");
+
+      if (privateKeyPath.empty()) {
+        TLS_LOG_ERROR("Private key path empty");
+        return -1;
+      }
+
+      char pk[privateKeyPath.size()+1];
+      privateKeyPath.copy(pk,privateKeyPath.size()+1);
+      pk[privateKeyPath.size()] = '\0';
+
+      if (SSL_CTX_use_PrivateKey_file(ctx, pk, SSL_FILETYPE_PEM) <= 0 )
+      {
+        TLS_LOG_ERROR("Loading endpoint's private key from file failed");
+        return -1;
+      }
+
+    }
+    else if (privateKeySource == FROM_HSM)
+    {
+      if (privateKeyPin.empty()) {
+        TLS_LOG_ERROR("The PIN is empty");
+        return -1;
+      }
+
+      char pin[privateKeyPin.size()+1];
+      privateKeyPin.copy(pin,privateKeyPin.size()+1);
+      pin[privateKeyPin.size()] = '\0';
+
+      ENGINE_ctrl_cmd_string(engine, "PIN", pin, 0);
+
+      if (getPrivateKeyFromHSM() != 0)
+        return -1;
+
+      if (SSL_CTX_use_PrivateKey(ctx, privateKey) != 1) {
+        TLS_LOG_ERROR("SSL_CTX_use_PrivateKey Failed to set private key");
+        return -1;
+      }
+    }
+    else
+    {
+      TLS_LOG_ERROR("Private key source unknown");
       return -1;
     }
 
     TLS_LOG_INFO("Loaded endpoint's private key");
 
+    if (!SSL_CTX_check_private_key(ctx)){
+      TLS_LOG_ERROR("Private key and certificate don't match");
+      return -1;
+    }
+
+    TLS_LOG_INFO("The private matches the certificate OK");
     return 0;
   }
 
@@ -472,6 +515,9 @@ namespace TLSAbstractionLayer {
     ctx = NULL;
     SSL_free(ssl);
     ssl = NULL;
+
+    if ( (privateKeySource == FROM_HSM) && (loadCofigAndEngine() != 0) )
+        return -1;
 
     if (setupProtocol() != 0)
       return -1;

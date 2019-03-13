@@ -129,6 +129,29 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
+  int OpenSSLSecureEndPoint::getPrivateKeyFromHSM(){
+
+    privateKey = NULL;
+
+    if (privateKeyId.empty()) {
+      TLS_LOG_ERROR("Private key id empty");
+      return -1;
+    }
+
+    char pkId[privateKeyId.size()+1];
+    privateKeyId.copy(pkId,privateKeyId.size()+1);
+    pkId[privateKeyId.size()] = '\0';
+
+    privateKey = ENGINE_load_private_key(engine, pkId, UI_OpenSSL(),NULL);
+
+    if (!privateKey) {
+      TLS_LOG_ERROR("Failed to load private key from HSM");
+    }
+
+    TLS_LOG_INFO("Loaded private key from HSM");
+    return 0;
+  }
+
   int OpenSSLSecureEndPoint::setupProtocol()
   {
     const SSL_METHOD * method = NULL;

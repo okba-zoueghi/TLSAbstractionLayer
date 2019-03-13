@@ -72,6 +72,7 @@ namespace TLSAbstractionLayer {
     int readFromBuffer(const char *,int size,char **);
   private:
     int loadCofigAndEngine();
+    int getPrivateKeyFromHSM();
     int setupProtocol();
     int setupVersion();
     int setupPeerVerification();

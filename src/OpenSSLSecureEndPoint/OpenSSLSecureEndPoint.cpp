@@ -146,6 +146,7 @@ namespace TLSAbstractionLayer {
 
     if (!privateKey) {
       TLS_LOG_ERROR("Failed to load private key from HSM");
+      return -1;
     }
 
     TLS_LOG_INFO("Loaded private key from HSM");

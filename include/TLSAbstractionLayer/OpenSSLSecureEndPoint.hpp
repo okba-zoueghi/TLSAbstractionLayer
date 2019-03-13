@@ -8,6 +8,8 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
+#include <openssl/conf.h>
+#include <openssl/engine.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
@@ -18,6 +20,8 @@
 
 #define DTLS_COOKIE_SECRET_LENGTH 20
 
+#define EGINE_ID "pkcs11"
+
 namespace TLSAbstractionLayer {
 
   class OpenSSLSecureEndPoint : public SecureEndPoint{
@@ -27,6 +31,8 @@ namespace TLSAbstractionLayer {
 	  SSL *ssl;
     BIO *rbio;
     BIO *wbio;
+    ENGINE *engine;
+    EVP_PKEY * privateKey;
     bool DTLSCookieSent;
 
   private:

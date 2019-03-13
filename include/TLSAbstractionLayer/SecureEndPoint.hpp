@@ -19,6 +19,8 @@ namespace TLSAbstractionLayer
 
   enum IO :std::uint8_t { SOCKET =0, BUFFER};
 
+  enum PrivateKeySource :std::uint8_t {FROM_FILE = 0, FROM_HSM};
+
   class SecureEndPoint
   {
 

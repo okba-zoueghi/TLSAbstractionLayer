@@ -91,8 +91,42 @@ namespace TLSAbstractionLayer {
   }
 
   OpenSSLSecureEndPoint::~OpenSSLSecureEndPoint(){
+
       SSL_CTX_free(ctx);
       SSL_free(ssl);
+
+      if (engineInitialized) {
+        ENGINE_finish(engine);
+        ENGINE_free(engine);
+      }
+  }
+
+  int OpenSSLSecureEndPoint::loadCofigAndEngine(){
+
+    engine = NULL;
+    engineInitialized = false;
+
+    if (OPENSSL_init_crypto(OPENSSL_INIT_LOAD_CONFIG, NULL) != 1) {
+      TLS_LOG_ERROR("Failed to load configuration from config file");
+      return -1;
+    }
+
+    engine = ENGINE_by_id(EGINE_ID);
+
+    if (!engine) {
+      TLS_LOG_ERROR("Failed to load engine");
+      return -1;
+    }
+
+    if (!ENGINE_init(engine)) {
+     TLS_LOG_ERROR("Failed to initialize engine");
+     ENGINE_free(engine);
+     return -1;
+    }
+
+    TLS_LOG_INFO("Engine loaded and initialized");
+    engineInitialized = true;
+    return 0;
   }
 
   int OpenSSLSecureEndPoint::setupProtocol()

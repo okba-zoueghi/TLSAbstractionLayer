@@ -34,6 +34,7 @@ namespace TLSAbstractionLayer {
     ENGINE *engine;
     EVP_PKEY * privateKey;
     bool DTLSCookieSent;
+    bool engineInitialized;
 
   private:
     static std::uint8_t cookie_lenght;
@@ -70,6 +71,7 @@ namespace TLSAbstractionLayer {
     int writeToBuffer(const char *,int size, char **);
     int readFromBuffer(const char *,int size,char **);
   private:
+    int loadCofigAndEngine();
     int setupProtocol();
     int setupVersion();
     int setupPeerVerification();

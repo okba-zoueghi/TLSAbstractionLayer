@@ -49,6 +49,18 @@ namespace TLSAbstractionLayer {
     socketFileDescriptor = fd;
   }
 
+  void SecureEndPoint::setPrivateKeySource(PrivateKeySource pkSource){
+    privateKeySource = pkSource;
+  }
+
+  void SecureEndPoint::setHSMPrivateKeyId(const std::string& pkId){
+    privateKeyId = pkId;
+  }
+
+  void SecureEndPoint::setHSMPrivateKeyPin(const std::string& pkPin){
+    privateKeyPin = pkPin;
+  }
+
   void SecureEndPoint::setPrivateKeyPath(const std::string& k){
     privateKeyPath = k;
   }

@@ -32,6 +32,9 @@ namespace TLSAbstractionLayer
     HandshakeState handshake;
     bool verifyPeerCerificate;
     int socketFileDescriptor;
+    PrivateKeySource privateKeySource;
+    std::string privateKeyId;
+    std::string privateKeyPin;
     std::string privateKeyPath;
     std::string endPointCertPath;
     std::string chainOfTrustCertPath;
@@ -100,6 +103,31 @@ namespace TLSAbstractionLayer
      * \warning The changes will not take place until calling setupIO method
      */
     void setSocketFileDescriptor(int);
+
+    /**
+     * \brief Set the private source
+     *
+     * \warning if the private key source is set to the value FROM_FILE, The TLS library
+     *  loads the private key from a file. In this case the RSA operations are done by the TLS
+     *  library and the private key is stored in RAM. However, if the private key source is set
+     *  to the value FROM_HSM, the TLS library delegates the RSA operations to a HSM.
+     *  In this case the private key is not retrieved and exists only inside the HSM.
+     */
+    void setPrivateKeySource(PrivateKeySource pkSource);
+
+    /**
+     * \brief Set the private key ID to be used from the HSM
+     * \warning This function should be used only if the private key source is set
+     *  to the value FROM_HSM
+     */
+    void setHSMPrivateKeyId(const std::string& pkId);
+
+    /**
+     * \brief Set the private key PIN
+     * \warning This function should be used only if the private key source is set
+     *  to the value FROM_HSM
+     */
+    void setHSMPrivateKeyPin(const std::string& pkPin);
 
     /**
      * \brief Set the private key path

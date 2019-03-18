@@ -75,6 +75,11 @@ int main(int argc, char **argv)
 
       OpenSSLSecureEndPoint tlsServer;
 
+      /* Set protocol and role */
+      tlsServer.setProtocol(Protocol::TLS);
+      tlsServer.setEndPointRole(EndPointRole::SERVER);
+      /* Set protocol and role */
+
       /* Configure certificates */
       tlsServer.setEndPointCertPath(cert);
       tlsServer.setChainOfTrustCertPath(cacert);

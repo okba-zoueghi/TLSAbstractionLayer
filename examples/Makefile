@@ -7,16 +7,17 @@ INC_FLAGS										:= -I $(INC_DIR)
 LD_FLAGS										:= -L $(OPENSSL_LIB_DIR) -l:libcrypto.so.1.1 -l:libssl.so.1.1 \
 															 -L $(TLSAbstractionLayer_LIB_DIR) -l:libtlsabstractionlayer.so.1.0
 
-all: client server dtls_client dtls_server
+SRCS       := $(shell ls *.cpp)
+OBJS       := $(patsubst %.cpp,%.o,$(SRCS))
+EXEC       := $(patsubst %.cpp,%.exe,$(SRCS))
 
-client:
-	$(CXX) client.cpp $(INC_FLAGS) $(LD_FLAGS) -o client.exe
+all: $(EXEC)
 
-server:
-	$(CXX) server.cpp $(INC_FLAGS) $(LD_FLAGS) -o server.exe
+$(EXEC):%.exe: %.o
+	$(CXX) $< -o ./$(@F) $(LD_FLAGS)
 
-dtls_client:
-	$(CXX) dtls_client.cpp $(INC_FLAGS) $(LD_FLAGS) -o dtls_client.exe
+$(OBJS):%.o: %.cpp
+	$(CXX) $(INC_FLAGS) -c $< -o ./$(@F)
 
-dtls_server:
-	$(CXX) dtls_server.cpp $(INC_FLAGS) $(LD_FLAGS) -o dtls_server.exe
+clean:
+	rm *.o *.exe

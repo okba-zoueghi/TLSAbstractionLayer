@@ -53,26 +53,43 @@ int main(int argc, char **argv)
   std::string pk = PRIVATE_KEY_PATH;
   std::string cert = CERTIFICATE_PATH;
   std::string cacert = CHAIN_OF_TRUST_CERT_PATH;
-  std::list<std::string> l;
   bool verifyPeerCerificate = true;
+  std::list<std::string> l;
 
-   //TLS v1.1 ciphers
-   l.push_back(TLS_RSA_WITH_AES_128_CBC_SHA);
+  OpenSSLSecureEndPoint tlsClient;
 
-   //TLS v1.2 ciphers
-   l.push_back(TLS_RSA_WITH_AES_256_GCM_SHA384);
-   l.push_back(TLS_RSA_WITH_AES_128_GCM_SHA256);
-   l.push_back(TLS_RSA_WITH_AES_256_CBC_SHA256);
+  /* Set protocol and role */
+  tlsClient.setProtocol(Protocol::TLS);
+  tlsClient.setEndPointRole(EndPointRole::CLIENT);
+  /* Set protocol and role */
 
-   //TLS v1.3 ciphers
-   l.push_back(TLS_AES_128_CCM_SHA256);
-   l.push_back(TLS_CHACHA20_POLY1305_SHA256);
+  /* Configure certificates */
+  tlsClient.setEndPointCertPath(cert);
+  tlsClient.setChainOfTrustCertPath(cacert);
+  tlsClient.setPeerVerify(verifyPeerCerificate);
+  /* Configure certificates */
 
-  OpenSSLSecureEndPoint tlsClient(Protocol::TLS,
-                                  ProtocolVersion::V_1_1,
-                                  ProtocolVersion::V_1_3,
-                                  EndPointRole::CLIENT,
-                                  verifyPeerCerificate,sock, pk, cert, cacert, l);
+  /* Configure ciher suites */
+  l.push_back(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
+  l.push_back(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
+  l.push_back(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
+  l.push_back(TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384);
+  tlsClient.setCipherSuiteList(l);
+  /* Configure ciher suites */
+
+  /* Configure TLS version */
+  tlsClient.setMinProtocolVersion(ProtocolVersion::V_1_2);
+  tlsClient.setMaxProtocolVersion(ProtocolVersion::V_1_2);
+  /* Configure TLS version */
+
+  /* Set private key from a file */
+  tlsClient.setPrivateKeySource(PrivateKeySource::FROM_FILE);
+  tlsClient.setPrivateKeyPath(pk);
+  /* Set private key from a file */
+
+  /* Set socket fd */
+  tlsClient.setSocketFileDescriptor(sock);
+  /* Set socket fd */
 
   int s = tlsClient.setupTLS();
   if (s == -1) {

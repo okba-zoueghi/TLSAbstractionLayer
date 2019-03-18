@@ -69,16 +69,40 @@ int main(int argc, char **argv)
       std::string pk = PRIVATE_KEY_PATH;
       std::string cert = CERTIFICATE_PATH;
       std::string cacert = CHAIN_OF_TRUST_CERT_PATH;
-      std::list<std::string> l;
       bool verifyPeerCerificate = true;
+      std::list<std::string> l;
 
-      l.push_back(TLS_RSA_WITH_AES_128_CBC_SHA);
+      OpenSSLSecureEndPoint tlsServer;
 
-      OpenSSLSecureEndPoint tlsServer(Protocol::TLS,
-                                        ProtocolVersion::V_1_1,
-                                        ProtocolVersion::V_1_2,
-                                        EndPointRole::SERVER,
-                                        verifyPeerCerificate,client_sock, pk, cert, cacert, l);
+      /* Set protocol and role */
+      tlsServer.setProtocol(Protocol::TLS);
+      tlsServer.setEndPointRole(EndPointRole::SERVER);
+      /* Set protocol and role */
+
+      /* Configure certificates */
+      tlsServer.setEndPointCertPath(cert);
+      tlsServer.setChainOfTrustCertPath(cacert);
+      tlsServer.setPeerVerify(verifyPeerCerificate);
+      /* Configure certificates */
+
+      /* Configure ciher suites */
+      l.push_back(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
+      tlsServer.setCipherSuiteList(l);
+      /* Configure ciher suites */
+
+      /* Configure TLS version */
+      tlsServer.setMinProtocolVersion(ProtocolVersion::V_1_2);
+      tlsServer.setMaxProtocolVersion(ProtocolVersion::V_1_2);
+      /* Configure TLS version */
+
+      /* Set private key from a file */
+      tlsServer.setPrivateKeySource(PrivateKeySource::FROM_FILE);
+      tlsServer.setPrivateKeyPath(pk);
+      /* Set private key from a file */
+
+      /* Set socket fd */
+      tlsServer.setSocketFileDescriptor(client_sock);
+      /* Set socket fd */
 
       int s = tlsServer.setupTLS();
       if (s == -1) {

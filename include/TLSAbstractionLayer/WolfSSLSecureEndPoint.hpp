@@ -3,6 +3,7 @@
 
 /* TLSAbstractionLayer */
 #include <TLSAbstractionLayer/SecureEndPoint.hpp>
+#include <TLSAbstractionLayer/wolfsslCipherSuites.hpp>
 
 /* WolfSSL */
 #include <wolfssl/options.h>

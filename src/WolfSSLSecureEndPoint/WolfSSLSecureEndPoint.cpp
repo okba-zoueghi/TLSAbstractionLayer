@@ -285,4 +285,30 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
+  int WolfSSLSecureEndPoint::setupCiphersuiteList(){
+
+    if (!cipherSuiteList.empty())
+    {
+      std::string csl;
+
+      for (std::list<std::string>::iterator it=cipherSuiteList.begin(); it != cipherSuiteList.end(); ++it)
+      {
+          csl += *it + ':';
+      }
+
+      char cipherSuitesString[csl.size()+1];
+      csl.copy(cipherSuitesString,csl.size());
+      cipherSuitesString[csl.size()-1] = '\0';
+
+      if ( wolfSSL_CTX_set_cipher_list(ctx,cipherSuitesString) != SSL_SUCCESS)
+      {
+        TLS_LOG_ERROR("Setting TLS v1.1 and v1.2 cipher suites failed");
+        return -1;
+      }
+    }
+
+    TLS_LOG_INFO("Cipher suites configured");
+    return 0;
+  }
+
 } /* TLSAbstractionLayer */

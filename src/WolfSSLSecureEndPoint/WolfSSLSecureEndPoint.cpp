@@ -90,4 +90,107 @@ namespace TLSAbstractionLayer {
     }
   }
 
+  int WolfSSLSecureEndPoint::setupProtocolAndVersion(){
+
+    WOLFSSL_METHOD* (*wolfSSLMethod)(void);
+
+    if (protocol != TLS) {
+      TLS_LOG_ERROR("Protocol version unknown");
+      return -1;
+    }
+
+    if (endPointRole != CLIENT && endPointRole != SERVER) {
+      TLS_LOG_ERROR("Endpoint role unknown");
+      return -1;
+    }
+
+    if (minProtocolVersion == V_1_3 || maxProtocolVersion == V_1_3) {
+      TLS_LOG_ERROR("TLS version not supported");
+      return -1;
+    }
+
+    if (minProtocolVersion != V_1_1 && minProtocolVersion != V_1_2) {
+      TLS_LOG_ERROR("Min TLS version unknown");
+      return -1;
+    }
+
+    if (maxProtocolVersion != V_1_1 && maxProtocolVersion != V_1_2) {
+      TLS_LOG_ERROR("Min TLS version unknown");
+      return -1;
+    }
+
+    if (minProtocolVersion > maxProtocolVersion) {
+      TLS_LOG_ERROR("The min TLS version is higher than the max TLS version");
+      return -1;
+    }
+
+    if (maxProtocolVersion == minProtocolVersion)
+    {
+
+      if (endPointRole == SERVER)
+      {
+
+        switch (maxProtocolVersion)
+        {
+          case V_1_1:
+            wolfSSLMethod = wolfTLSv1_1_server_method;
+            break;
+          case V_1_2:
+            wolfSSLMethod = wolfTLSv1_2_server_method;
+            break;
+          default:
+            break;
+        }
+
+      }
+      else
+      {
+        switch (maxProtocolVersion)
+        {
+          case V_1_1:
+            wolfSSLMethod = wolfTLSv1_1_client_method;
+            break;
+          case V_1_2:
+            wolfSSLMethod = wolfTLSv1_2_client_method;
+            break;
+          default:
+            break;
+        }
+      }
+
+      if ((ctx = wolfSSL_CTX_new(wolfSSLMethod())) == NULL)
+      {
+        TLS_LOG_ERROR("Failed to create WOLFSSL_CTX");
+        return -1;
+      }
+    }
+    else
+    {
+      switch (endPointRole)
+      {
+        case SERVER:
+          wolfSSLMethod = wolfSSLv23_server_method;
+        case CLIENT:
+          wolfSSLMethod = wolfSSLv23_client_method;
+      }
+
+      if ((ctx = wolfSSL_CTX_new(wolfSSLMethod())) == NULL)
+      {
+        TLS_LOG_ERROR("Failed to create WOLFSSL_CTX");
+        return -1;
+      }
+
+      if (wolfSSL_CTX_SetMinVersion(ctx, WOLFSSL_TLSV1_1) != SSL_SUCCESS)
+      {
+        TLS_LOG_ERROR("Failed to set min version");
+        return -1;
+      }
+    }
+
+    TLS_LOG_INFO("Setup protcol OK");
+    TLS_LOG_INFO("Setup version OK");
+
+    return 0;
+  }
+
 } /* TLSAbstractionLayer */

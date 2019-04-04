@@ -39,3 +39,4 @@ Thumbs.db
 
 !/libs/openssl/*
 !/libs/softwareHSM/*.so*
+!/libs/wolfssl/*

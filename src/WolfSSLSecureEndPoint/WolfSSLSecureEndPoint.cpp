@@ -193,4 +193,30 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
+  int WolfSSLSecureEndPoint::setupPeerVerification(){
+
+    if (verifyPeerCerificate)
+    {
+      switch (endPointRole)
+      {
+        case CLIENT:
+          wolfSSL_CTX_set_verify(ctx,SSL_VERIFY_PEER, 0);
+          break;
+        case SERVER:
+          wolfSSL_CTX_set_verify(ctx,SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, 0);
+          break;
+        default:
+          TLS_LOG_ERROR("Endpoint role unknown");
+          return -1;
+      }
+    }
+    else
+    {
+      wolfSSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
+    }
+
+    TLS_LOG_INFO("Peer verification setup OK");
+    return 0;
+  }
+
 } /* TLSAbstractionLayer */

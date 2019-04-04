@@ -219,4 +219,70 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
+  int WolfSSLSecureEndPoint::setupCredentials(){
+
+    if (endPointCertPath.empty() || chainOfTrustCertPath.empty()) {
+      TLS_LOG_ERROR("Setup credentials string empty");
+      return -1;
+    }
+
+    char cert[endPointCertPath.size()+1];
+    char cacert[chainOfTrustCertPath.size()+1];
+
+    endPointCertPath.copy(cert,endPointCertPath.size()+1);
+    cert[endPointCertPath.size()] = '\0';
+    chainOfTrustCertPath.copy(cacert,chainOfTrustCertPath.size()+1);
+    cacert[chainOfTrustCertPath.size()] = '\0';
+
+    if (wolfSSL_CTX_load_verify_locations(ctx, cacert, NULL) != SSL_SUCCESS)
+    {
+      TLS_LOG_ERROR("Loading chain of trust certificate failed");
+      return -1;
+    }
+
+    TLS_LOG_INFO("Loaded chain of trust certificate");
+
+    if (wolfSSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) != SSL_SUCCESS)
+    {
+      TLS_LOG_ERROR("Loading endpoint's certificate failed");
+      return -1;
+    }
+
+    TLS_LOG_INFO("Loaded endpoint's certificate");
+
+    if (privateKeySource == FROM_FILE)
+    {
+
+      if (privateKeyPath.empty()) {
+        TLS_LOG_ERROR("Private key path empty");
+        return -1;
+      }
+
+      char pk[privateKeyPath.size()+1];
+      privateKeyPath.copy(pk,privateKeyPath.size()+1);
+      pk[privateKeyPath.size()] = '\0';
+
+      if (wolfSSL_CTX_use_PrivateKey_file(ctx, pk, SSL_FILETYPE_PEM) != SSL_SUCCESS)
+      {
+        TLS_LOG_ERROR("Loading endpoint's private key from file failed");
+        return -1;
+      }
+
+    }
+    else if (privateKeySource == FROM_HSM)
+    {
+      /* TODO */
+      TLS_LOG_ERROR("Private from HSM not supported")
+      return -1;
+    }
+    else
+    {
+      TLS_LOG_ERROR("Private key source unknown");
+      return -1;
+    }
+
+    TLS_LOG_INFO("Loaded endpoint's private key");
+    return 0;
+  }
+
 } /* TLSAbstractionLayer */

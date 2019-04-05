@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <TLSAbstractionLayer/OpenSSLSecureEndPoint.hpp>
+#include <TLSAbstractionLayer/WolfSSLSecureEndPoint.hpp>
 
 
 #define PORT 						           4433
@@ -11,7 +11,6 @@
 #define CHAIN_OF_TRUST_CERT_PATH	 "./ca/intermediate/certs/ca-chain.cert.pem"
 #define MSG 						           "Hello world"
 
-using namespace TLSAbstractionLayer;
 
 
 int main(int argc, char **argv)
@@ -72,11 +71,11 @@ int main(int argc, char **argv)
       bool verifyPeerCerificate = true;
       std::list<std::string> l;
 
-      OpenSSLSecureEndPoint tlsServer;
+      TLSAbstractionLayer::WolfSSLSecureEndPoint tlsServer;
 
       /* Set protocol and role */
-      tlsServer.setProtocol(Protocol::TLS);
-      tlsServer.setEndPointRole(EndPointRole::SERVER);
+      tlsServer.setProtocol(TLSAbstractionLayer::Protocol::TLS);
+      tlsServer.setEndPointRole(TLSAbstractionLayer::EndPointRole::SERVER);
       /* Set protocol and role */
 
       /* Configure certificates */
@@ -86,17 +85,17 @@ int main(int argc, char **argv)
       /* Configure certificates */
 
       /* Configure ciher suites */
-      l.push_back(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
+      l.push_back(TLSAbstractionLayer::TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
       tlsServer.setCipherSuiteList(l);
       /* Configure ciher suites */
 
       /* Configure TLS version */
-      tlsServer.setMinProtocolVersion(ProtocolVersion::V_1_2);
-      tlsServer.setMaxProtocolVersion(ProtocolVersion::V_1_2);
+      tlsServer.setMinProtocolVersion(TLSAbstractionLayer::ProtocolVersion::V_1_2);
+      tlsServer.setMaxProtocolVersion(TLSAbstractionLayer::ProtocolVersion::V_1_2);
       /* Configure TLS version */
 
       /* Set private key from a file */
-      tlsServer.setPrivateKeySource(PrivateKeySource::FROM_FILE);
+      tlsServer.setPrivateKeySource(TLSAbstractionLayer::PrivateKeySource::FROM_FILE);
       tlsServer.setPrivateKeyPath(pk);
       /* Set private key from a file */
 
@@ -110,7 +109,7 @@ int main(int argc, char **argv)
         return -1;
       }
 
-      s = tlsServer.setupIO(SOCKET);
+      s = tlsServer.setupIO(TLSAbstractionLayer::IO::SOCKET);
       if (s == -1) {
         printf("IO setup failed\n");
         return -1;
@@ -118,13 +117,13 @@ int main(int argc, char **argv)
 
       int res = tlsServer.doHandshake();
 
-      s = tlsServer.setupIO(BUFFER);
+      s = tlsServer.setupIO(TLSAbstractionLayer::IO::BUFFER);
       if (s == -1) {
         printf("IO setup failed\n");
         return -1;
       }
 
-      if (res == HandshakeState::ESTABLISHED) {
+      if (res == TLSAbstractionLayer::HandshakeState::ESTABLISHED) {
         printf("Plain text message  --> clearMsg : %s, clearMsgsize: %d\n",MSG,sizeof(MSG));
 
         char * encMsg;
@@ -132,7 +131,7 @@ int main(int argc, char **argv)
         printf("Encrypted message --> encMsg :%s, size: %d\n",encMsg,ret);
         send(client_sock,encMsg,ret,0);
       }
-      else if(res == HandshakeState::FAILED)
+      else if(res == TLSAbstractionLayer::HandshakeState::FAILED)
       {
         printf("Handshake failed\n");
       }

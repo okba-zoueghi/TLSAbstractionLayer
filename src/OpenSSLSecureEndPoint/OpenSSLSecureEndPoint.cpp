@@ -1,12 +1,7 @@
 #include <TLSAbstractionLayer/OpenSSLSecureEndPoint.hpp>
+#include <TLSAbstractionLayer/opensslConfig.hpp>
 
-#if TLS_DEBUG == 1
-#define TLS_LOG_INFO(x) std::cout << "[TLS INFO] : " << x << "\n"
-#define TLS_LOG_ERROR(x) std::cout << "[TLS ERROR] : " << x << "\n";ERR_print_errors_fp(stderr)
-#else
-#define TLS_LOG_INFO(x)
-#define TLS_LOG_ERROR(x)
-#endif
+
 
 namespace TLSAbstractionLayer {
 

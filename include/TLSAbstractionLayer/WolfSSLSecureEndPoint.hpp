@@ -3,11 +3,12 @@
 
 /* TLSAbstractionLayer */
 #include <TLSAbstractionLayer/SecureEndPoint.hpp>
+#include <TLSAbstractionLayer/wolfsslCipherSuites.hpp>
 
 /* WolfSSL */
 #include <wolfssl/options.h>
-#include <wolfssl/internal.h>
 #include <wolfssl/ssl.h>
+#include <wolfssl/openssl/ssl.h>
 
 /* Utilities */
 #include <sys/socket.h>
@@ -15,23 +16,16 @@
 #include <string.h>
 #include <iostream>
 
-#define TLS_DEBUG 1
-
 namespace TLSAbstractionLayer {
 
-  typedef struct IOCTX
-  {
-    char * msg;
-    size_t msgSize;
-  } IOCTX;
 
   class WolfSSLSecureEndPoint : public SecureEndPoint{
 
   private:
     WOLFSSL_CTX *ctx;
 	  WOLFSSL *ssl;
-    IOCTX *sendCTX;
-    IOCTX *recvCTX;
+    WOLFSSL_BIO *wbio;
+    WOLFSSL_BIO *rbio;
 
   public:
 
@@ -57,10 +51,10 @@ namespace TLSAbstractionLayer {
     int setupTLS();
     int setupIO(IO);
     int doHandshake();
-    int send(const char *, size_t);
-    int receive(char *, size_t);
-    int writeToBuffer(const char *,size_t size, char **);
-    int readFromBuffer(const char *,size_t size,char **);
+    int send(const char *, int);
+    int receive(char *, int);
+    int writeToBuffer(const char *,int size, char **);
+    int readFromBuffer(const char *,int size,char **);
   private:
     int setupProtocolAndVersion();
     int setupPeerVerification();

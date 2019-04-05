@@ -16,8 +16,6 @@
 #include <iostream>
 #include <mutex>
 
-#define TLS_DEBUG 1
-
 #define DTLS_COOKIE_SECRET_LENGTH 20
 
 #define EGINE_ID "pkcs11"

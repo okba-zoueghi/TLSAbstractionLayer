@@ -5,6 +5,8 @@
 #include <list>
 #include <iterator>
 
+#define TLS_DEBUG 1
+
 namespace TLSAbstractionLayer
 {
   enum EndPointRole : std::uint8_t { SERVER = 0, CLIENT };

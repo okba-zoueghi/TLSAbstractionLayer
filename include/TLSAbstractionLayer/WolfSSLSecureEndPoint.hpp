@@ -16,8 +16,6 @@
 #include <string.h>
 #include <iostream>
 
-#define TLS_DEBUG 1
-
 namespace TLSAbstractionLayer {
 
 

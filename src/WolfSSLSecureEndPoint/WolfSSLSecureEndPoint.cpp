@@ -311,4 +311,15 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
+  int WolfSSLSecureEndPoint::CreateSSLObject(){
+
+    if ((ssl = wolfSSL_new(ctx)) == NULL)
+    {
+      TLS_LOG_ERROR("wolfSSL_new() failed");
+      return -1;
+    }
+
+    return 0;
+  }
+
 } /* TLSAbstractionLayer */

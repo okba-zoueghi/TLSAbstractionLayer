@@ -322,4 +322,37 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
+  int WolfSSLSecureEndPoint::setupTLS(){
+
+    if(ctx)
+    {
+      wolfSSL_CTX_free(ctx);
+      ctx = NULL;
+    }
+
+    if(ssl)
+    {
+      wolfSSL_free(ssl);
+      ssl = NULL;
+    }
+
+    if (setupProtocolAndVersion() != 0)
+      return -1;
+
+    if (setupPeerVerification() != 0)
+      return -1;
+
+    if (setupCredentials() != 0)
+      return -1;
+
+    if (setupCiphersuiteList() != 0)
+      return -1;
+
+    if (CreateSSLObject() != 0)
+      return -1;
+
+    TLS_LOG_INFO("TLS setup OK");
+    return 0;
+  }
+
 } /* TLSAbstractionLayer */

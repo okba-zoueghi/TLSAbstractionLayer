@@ -10,7 +10,7 @@
 
 namespace TLSAbstractionLayer {
 
-  WolfSSLSecureEndPoint::WolfSSLSecureEndPoint(): ctx(NULL), ssl(NULL), sendCTX(NULL), recvCTX(NULL){
+  WolfSSLSecureEndPoint::WolfSSLSecureEndPoint(): ctx(NULL), ssl(NULL), wbio(NULL), rbio(NULL){
   }
 
   WolfSSLSecureEndPoint::WolfSSLSecureEndPoint (Protocol p,
@@ -24,7 +24,7 @@ namespace TLSAbstractionLayer {
                           std::string cotcp,
                           std::list<std::string> csl):
                           SecureEndPoint(p, minV, maxV, epr, b, sockfd, pkp, epcp, cotcp, csl),
-                          ctx(NULL), ssl(NULL), sendCTX(NULL), recvCTX(NULL){
+                          ctx(NULL), ssl(NULL), wbio(NULL), rbio(NULL){
   }
 
   WolfSSLSecureEndPoint::WolfSSLSecureEndPoint (const WolfSSLSecureEndPoint& wolfsslEndpoint):
@@ -38,7 +38,7 @@ namespace TLSAbstractionLayer {
                                         wolfsslEndpoint.endPointCertPath,
                                         wolfsslEndpoint.chainOfTrustCertPath,
                                         wolfsslEndpoint.cipherSuiteList),
-                                        ctx(NULL), ssl(NULL), sendCTX(NULL), recvCTX(NULL){
+                                        ctx(NULL), ssl(NULL), wbio(NULL), rbio(NULL){
   }
 
   WolfSSLSecureEndPoint& WolfSSLSecureEndPoint::operator=(const WolfSSLSecureEndPoint& wolfsslEndpoint){

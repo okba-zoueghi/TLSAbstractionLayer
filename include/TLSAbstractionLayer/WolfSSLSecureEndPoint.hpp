@@ -20,19 +20,14 @@
 
 namespace TLSAbstractionLayer {
 
-  typedef struct IOCTX
-  {
-    char * msg;
-    size_t msgSize;
-  } IOCTX;
 
   class WolfSSLSecureEndPoint : public SecureEndPoint{
 
   private:
     WOLFSSL_CTX *ctx;
 	  WOLFSSL *ssl;
-    IOCTX *sendCTX;
-    IOCTX *recvCTX;
+    WOLFSSL_BIO *wbio;
+    WOLFSSL_BIO *rbio;
 
   public:
 

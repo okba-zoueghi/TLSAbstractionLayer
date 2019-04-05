@@ -1,12 +1,12 @@
 #ifndef SecureEndPoint_H
 #define SecureEndPoint_H
 
+#include <TLSAbstractionLayer/secureEndPointConfig.hpp>
+
 #include <string>
 #include <list>
 #include <iterator>
 
-#define TLS_DEBUG 1
-#define PRINT_TLS_LIBRARY 1
 
 namespace TLSAbstractionLayer
 {

@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <TLSAbstractionLayer/OpenSSLSecureEndPoint.hpp>
+#include <TLSAbstractionLayer/WolfSSLSecureEndPoint.hpp>
 
 #define SERVER_PORT               4433
 #define SERVER_IP                 "192.168.0.4"
@@ -10,7 +10,7 @@
 #define PRIVATE_KEY_PATH 			    "./ca/intermediate/private/client.key.pem"
 #define CHAIN_OF_TRUST_CERT_PATH	"./ca/intermediate/certs/ca-chain.cert.pem"
 
-using namespace TLSAbstractionLayer;
+
 
 int main(int argc, char **argv)
 {
@@ -22,11 +22,6 @@ int main(int argc, char **argv)
   server.sin_family = AF_INET;
   server.sin_port = htons(SERVER_PORT);
   server.sin_addr.s_addr = inet_addr(SERVER_IP);
-
-	//Initialize the library
-  SSL_load_error_strings();
-  OpenSSL_add_ssl_algorithms();
-
 
 	//Create socket
   sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -56,11 +51,11 @@ int main(int argc, char **argv)
   bool verifyPeerCerificate = true;
   std::list<std::string> l;
 
-  OpenSSLSecureEndPoint tlsClient;
+  TLSAbstractionLayer::WolfSSLSecureEndPoint tlsClient;
 
   /* Set protocol and role */
-  tlsClient.setProtocol(Protocol::TLS);
-  tlsClient.setEndPointRole(EndPointRole::CLIENT);
+  tlsClient.setProtocol(TLSAbstractionLayer::Protocol::TLS);
+  tlsClient.setEndPointRole(TLSAbstractionLayer::EndPointRole::CLIENT);
   /* Set protocol and role */
 
   /* Configure certificates */
@@ -70,20 +65,20 @@ int main(int argc, char **argv)
   /* Configure certificates */
 
   /* Configure ciher suites */
-  l.push_back(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
-  l.push_back(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
-  l.push_back(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
-  l.push_back(TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384);
+  l.push_back(TLSAbstractionLayer::TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
+  // l.push_back(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
+  // l.push_back(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
+  // l.push_back(TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384);
   tlsClient.setCipherSuiteList(l);
   /* Configure ciher suites */
 
   /* Configure TLS version */
-  tlsClient.setMinProtocolVersion(ProtocolVersion::V_1_2);
-  tlsClient.setMaxProtocolVersion(ProtocolVersion::V_1_2);
+  tlsClient.setMinProtocolVersion(TLSAbstractionLayer::ProtocolVersion::V_1_2);
+  tlsClient.setMaxProtocolVersion(TLSAbstractionLayer::ProtocolVersion::V_1_2);
   /* Configure TLS version */
 
   /* Set private key from a file */
-  tlsClient.setPrivateKeySource(PrivateKeySource::FROM_FILE);
+  tlsClient.setPrivateKeySource(TLSAbstractionLayer::PrivateKeySource::FROM_FILE);
   tlsClient.setPrivateKeyPath(pk);
   /* Set private key from a file */
 
@@ -97,7 +92,7 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  s = tlsClient.setupIO(SOCKET);
+  s = tlsClient.setupIO(TLSAbstractionLayer::IO::SOCKET);
   if (s == -1) {
     printf("IO setup failed\n");
     return -1;
@@ -105,13 +100,13 @@ int main(int argc, char **argv)
 
   int res = tlsClient.doHandshake();
 
-  s = tlsClient.setupIO(BUFFER);
+  s = tlsClient.setupIO(TLSAbstractionLayer::IO::BUFFER);
   if (s == -1) {
     printf("IO setup failed\n");
     return -1;
   }
 
-  if (res == HandshakeState::ESTABLISHED) {
+  if (res == TLSAbstractionLayer::HandshakeState::ESTABLISHED) {
     printf("Handshake established\n");
     char encMsg[1000];
     int ret = recv(sock,encMsg,1000,0);
@@ -123,7 +118,7 @@ int main(int argc, char **argv)
     //tlsClient.receive(msg,100);
     printf("Decrypted message --> clearMsg : %s, clearMsgsize : %d\n",clearMsg,ret);
   }
-  else if(res == HandshakeState::FAILED)
+  else if(res == TLSAbstractionLayer::HandshakeState::FAILED)
   {
     printf("Handshake failed\n");
   }

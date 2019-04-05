@@ -355,4 +355,39 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
+  int WolfSSLSecureEndPoint::setupIO(IO io)
+  {
+    if (io == SOCKET) {
+      if (socketFileDescriptor <= 0) {
+        TLS_LOG_ERROR("Invalid socket file descriptor");
+        return -1;
+      }
+      if (wolfSSL_set_fd(ssl, socketFileDescriptor) == 0)
+      {
+        TLS_LOG_ERROR("Failed to set socket file descriptor");
+        return -1;
+      }
+      TLS_LOG_INFO("Set socket file descriptor OK");
+    }
+    else if(io == BUFFER)
+    {
+      rbio = wolfSSL_BIO_new(wolfSSL_BIO_s_mem());
+      wbio = wolfSSL_BIO_new(wolfSSL_BIO_s_mem());
+
+      if (wbio == NULL || rbio == NULL) {
+        TLS_LOG_ERROR("Failed to allocate memory BIOs");
+        return -1;
+      }
+
+      wolfSSL_set_bio(ssl,rbio,wbio);
+    }
+    else
+    {
+      TLS_LOG_ERROR("IO unknown");
+      return -1;
+    }
+
+    return 0;
+  }
+
 } /* TLSAbstractionLayer */

@@ -514,4 +514,30 @@ namespace TLSAbstractionLayer {
     return ret;
   }
 
+  int WolfSSLSecureEndPoint::readFromBuffer(const char * encMsg, size_t encMsgsize, char **clearMsg)
+  {
+
+    int ret = wolfSSL_BIO_write(rbio,encMsg,encMsgsize);
+    if (ret <= 0) {
+      TLS_LOG_ERROR("BIO_write FAILED");
+      return -1;
+    }
+
+    (*clearMsg) = NULL;
+    (*clearMsg) = new char[encMsgsize];
+    if ((*clearMsg) == NULL) {
+      TLS_LOG_ERROR("Allocating memory to store plain text message FAILED");
+      return -1;
+    }
+
+    ret = wolfSSL_read(ssl,(*clearMsg),encMsgsize);
+    if (ret <= 0) {
+      TLS_LOG_ERROR("SSL_read FAILED");
+      return -1;
+    }
+
+    TLS_LOG_INFO("Message decrypted");
+    return ret;
+  }
+
 } /* TLSAbstractionLayer */

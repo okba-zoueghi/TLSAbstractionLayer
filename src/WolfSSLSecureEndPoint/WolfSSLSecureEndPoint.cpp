@@ -430,4 +430,30 @@ namespace TLSAbstractionLayer {
     return HandshakeState::ESTABLISHED;
   }
 
+  int WolfSSLSecureEndPoint::send(const char * msg, size_t size)
+  {
+    int ret = wolfSSL_write(ssl, msg, size);
+
+    if (ret <= 0)
+    {
+      switch (wolfSSL_get_error(ssl,ret))
+      {
+        case SSL_ERROR_WANT_READ :
+          return Error::ERROR_WANT_READ;
+          break;
+        case SSL_ERROR_WANT_WRITE :
+          return Error::ERROR_WANT_WRITE;
+          break;
+
+        default:
+          TLS_LOG_ERROR("SSL_write FAILED");
+          return Error::ERROR_WRITE_FAILED;
+      };
+
+    }
+
+    TLS_LOG_INFO("Message sent");
+    return ret;
+  }
+
 } /* TLSAbstractionLayer */

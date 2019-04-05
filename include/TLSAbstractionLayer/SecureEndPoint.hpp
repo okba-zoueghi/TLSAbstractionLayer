@@ -6,6 +6,7 @@
 #include <iterator>
 
 #define TLS_DEBUG 1
+#define PRINT_TLS_LIBRARY 1
 
 namespace TLSAbstractionLayer
 {

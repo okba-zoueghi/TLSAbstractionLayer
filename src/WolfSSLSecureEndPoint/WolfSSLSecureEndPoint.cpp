@@ -426,11 +426,11 @@ namespace TLSAbstractionLayer {
       };
     }
 
-    TLS_LOG_INFO("Handshake ESTABLISHED");
+    TLS_LOG_INFO("WOLFSSL Handshake ESTABLISHED");
     return HandshakeState::ESTABLISHED;
   }
 
-  int WolfSSLSecureEndPoint::send(const char * msg, size_t size)
+  int WolfSSLSecureEndPoint::send(const char * msg, int size)
   {
     int ret = wolfSSL_write(ssl, msg, size);
 
@@ -456,7 +456,7 @@ namespace TLSAbstractionLayer {
     return ret;
   }
 
-  int WolfSSLSecureEndPoint::receive(char * msg, size_t size)
+  int WolfSSLSecureEndPoint::receive(char * msg, int size)
   {
     int ret = wolfSSL_read(ssl, msg, size);
 
@@ -481,7 +481,7 @@ namespace TLSAbstractionLayer {
     return ret;
   }
 
-  int WolfSSLSecureEndPoint::writeToBuffer(const char *clearMsg, size_t clearMsgsize, char ** encMsg)
+  int WolfSSLSecureEndPoint::writeToBuffer(const char *clearMsg, int clearMsgsize, char ** encMsg)
   {
     int ret = wolfSSL_write(ssl,clearMsg,clearMsgsize);
     if (ret < 0) {
@@ -514,7 +514,7 @@ namespace TLSAbstractionLayer {
     return ret;
   }
 
-  int WolfSSLSecureEndPoint::readFromBuffer(const char * encMsg, size_t encMsgsize, char **clearMsg)
+  int WolfSSLSecureEndPoint::readFromBuffer(const char * encMsg, int encMsgsize, char **clearMsg)
   {
 
     int ret = wolfSSL_BIO_write(rbio,encMsg,encMsgsize);

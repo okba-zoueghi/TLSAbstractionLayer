@@ -170,8 +170,10 @@ namespace TLSAbstractionLayer {
       {
         case SERVER:
           wolfSSLMethod = wolfSSLv23_server_method;
+          break;
         case CLIENT:
           wolfSSLMethod = wolfSSLv23_client_method;
+          break;
       }
 
       if ((ctx = wolfSSL_CTX_new(wolfSSLMethod())) == NULL)

@@ -392,4 +392,42 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
+  int WolfSSLSecureEndPoint::doHandshake()
+  {
+
+    int ret = 0;
+
+    switch (endPointRole) {
+      case SERVER:
+        ret = wolfSSL_accept(ssl);
+        break;
+      case CLIENT:
+        ret = wolfSSL_connect(ssl);
+        break;
+      default:
+        TLS_LOG_ERROR("EndPointRole unknown");
+        return -1;
+    }
+
+    if (ret != SSL_SUCCESS)
+    {
+      switch (wolfSSL_get_error(ssl,ret))
+      {
+        case SSL_ERROR_WANT_READ :
+          return Error::ERROR_WANT_READ;
+          break;
+        case SSL_ERROR_WANT_WRITE :
+          return Error::ERROR_WANT_WRITE;
+          break;
+
+        default:
+          TLS_LOG_ERROR("Handshake FAILED");
+          return HandshakeState::FAILED;
+      };
+    }
+
+    TLS_LOG_INFO("Handshake ESTABLISHED");
+    return HandshakeState::ESTABLISHED;
+  }
+
 } /* TLSAbstractionLayer */

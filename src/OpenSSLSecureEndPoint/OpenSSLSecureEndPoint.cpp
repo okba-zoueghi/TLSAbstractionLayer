@@ -111,7 +111,7 @@ namespace TLSAbstractionLayer {
       }
   }
 
-  int OpenSSLSecureEndPoint::loadCofigAndEngine(){
+  int OpenSSLSecureEndPoint::loadConfigAndEngine(){
 
     engine = NULL;
     engineInitialized = false;
@@ -536,7 +536,7 @@ namespace TLSAbstractionLayer {
     SSL_free(ssl);
     ssl = NULL;
 
-    if ( (privateKeySource == FROM_HSM) && (loadCofigAndEngine() != 0) )
+    if ( (privateKeySource == FROM_HSM) && (loadConfigAndEngine() != 0) )
         return -1;
 
     if (setupProtocol() != 0)

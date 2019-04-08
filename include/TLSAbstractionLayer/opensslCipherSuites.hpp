@@ -1,5 +1,5 @@
-#ifndef opensslCipherSuites_H
-#define  opensslCipherSuites_H
+#ifndef CipherSuites_H
+#define CipherSuites_H
 
 namespace TLSAbstractionLayer
 {

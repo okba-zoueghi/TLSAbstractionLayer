@@ -1,5 +1,16 @@
+/* TLSAbstractionLayer */
 #include <TLSAbstractionLayer/WolfSSLSecureEndPoint.hpp>
 #include <TLSAbstractionLayer/wolfsslConfig.hpp>
+
+/* WolfSSL */
+#include <wolfssl/openssl/ssl.h>
+#include <wolfssl/options.h>
+#include <wolfssl/ssl.h>
+
+/* Utilities */
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <iostream>
 
 
 

@@ -8,13 +8,9 @@
 /* WolfSSL */
 #include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
-#include <wolfssl/openssl/ssl.h>
 
 /* Utilities */
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include <string.h>
-#include <iostream>
 
 namespace TLSAbstractionLayer {
 

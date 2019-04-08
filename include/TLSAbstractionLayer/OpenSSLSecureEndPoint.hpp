@@ -5,20 +5,12 @@
 #include <TLSAbstractionLayer/SecureEndPoint.hpp>
 #include <TLSAbstractionLayer/opensslCipherSuites.hpp>
 
-/* OpenSSL */
-#include <openssl/bio.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#include <openssl/rand.h>
-#include <openssl/conf.h>
-#include <openssl/engine.h>
-
 /* Utilities */
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <string.h>
 #include <iostream>
 #include <mutex>
+
+/* OpenSSL */
+#include <openssl/bio.h>
 
 #define DTLS_COOKIE_SECRET_LENGTH 20
 

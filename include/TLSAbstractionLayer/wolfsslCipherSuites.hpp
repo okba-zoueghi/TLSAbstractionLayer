@@ -1,5 +1,5 @@
-#ifndef wolfsslCipherSuites_H
-#define wolfsslCipherSuites_H
+#ifndef CipherSuites_H
+#define CipherSuites_H
 
 namespace TLSAbstractionLayer
 {

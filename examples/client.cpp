@@ -2,7 +2,9 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <TLSAbstractionLayer/OpenSSLSecureEndPoint.hpp>
 #include <TLSAbstractionLayer/WolfSSLSecureEndPoint.hpp>
+
 
 #define SERVER_PORT               4433
 #define SERVER_IP                 "192.168.0.4"
@@ -51,6 +53,7 @@ int main(int argc, char **argv)
   bool verifyPeerCerificate = true;
   std::list<std::string> l;
 
+  //TLSAbstractionLayer::OpenSSLSecureEndPoint tlsClient;
   TLSAbstractionLayer::WolfSSLSecureEndPoint tlsClient;
 
   /* Set protocol and role */

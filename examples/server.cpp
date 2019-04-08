@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <TLSAbstractionLayer/OpenSSLSecureEndPoint.hpp>
 #include <TLSAbstractionLayer/WolfSSLSecureEndPoint.hpp>
 
 
@@ -72,6 +73,7 @@ int main(int argc, char **argv)
       std::list<std::string> l;
 
       TLSAbstractionLayer::WolfSSLSecureEndPoint tlsServer;
+      //TLSAbstractionLayer::OpenSSLSecureEndPoint tlsServer;
 
       /* Set protocol and role */
       tlsServer.setProtocol(TLSAbstractionLayer::Protocol::TLS);

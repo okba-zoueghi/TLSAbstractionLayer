@@ -22,11 +22,6 @@ int main(int argc, char **argv)
   server.sin_port = htons(SERVER_PORT);
   server.sin_addr.s_addr = inet_addr(SERVER_IP);
 
-	//Initialize the library
-  SSL_load_error_strings();
-  OpenSSL_add_ssl_algorithms();
-
-
 	//Create socket
   sock = socket(AF_INET , SOCK_STREAM , 0);
 	if (sock == -1)

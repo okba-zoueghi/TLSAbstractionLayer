@@ -501,17 +501,18 @@ namespace TLSAbstractionLayer {
     return 0;
   }
 
-  int OpenSSLSecureEndPoint::setupRole()
-  {
-    ssl = SSL_new(ctx);
+  int OpenSSLSecureEndPoint::CreateSSLObject(){
 
-    if (!ssl)
+    if ((ssl = SSL_new(ctx)) == NULL)
     {
       TLS_LOG_ERROR("SSL_new() failed");
       return -1;
     }
+    return 0;
+  }
 
-
+  int OpenSSLSecureEndPoint::setupRole()
+  {
     switch (endPointRole)
     {
       case CLIENT:
@@ -555,6 +556,9 @@ namespace TLSAbstractionLayer {
       return -1;
 
     if (setupCiphersuiteList()!= 0)
+      return -1;
+
+    if (CreateSSLObject()!= 0)
       return -1;
 
     if (setupRole()!= 0)

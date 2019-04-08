@@ -74,6 +74,7 @@ namespace TLSAbstractionLayer {
     int initializeDTLSCookies();
     int setupDTLSCookies();
     int setupCiphersuiteList();
+    int CreateSSLObject();
     int setupRole();
     static int generate_cookie(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len);
     static int verify_cookie(SSL *ssl, const unsigned char *cookie, unsigned int cookie_len);

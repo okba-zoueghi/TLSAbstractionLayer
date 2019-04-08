@@ -222,13 +222,6 @@ namespace TLSAbstractionLayer {
           return -1;
       }
 
-      if(SSL_CTX_set_min_proto_version(ctx,minVersion) == 0)
-      {
-        TLS_LOG_ERROR("setting minimum protocol version failed");
-        return -1;
-      }
-
-
       switch (maxProtocolVersion)
       {
         case V_1_1:
@@ -244,6 +237,17 @@ namespace TLSAbstractionLayer {
         default:
           TLS_LOG_ERROR("Maximum protocol version doesn't match");
           return -1;
+      }
+
+      if (minVersion > maxVersion) {
+        TLS_LOG_ERROR("The min TLS version is higher than the max TLS version");
+        return -1;
+      }
+
+      if(SSL_CTX_set_min_proto_version(ctx,minVersion) == 0)
+      {
+        TLS_LOG_ERROR("setting minimum protocol version failed");
+        return -1;
       }
 
       if(SSL_CTX_set_max_proto_version(ctx,maxVersion) == 0)
@@ -269,12 +273,6 @@ namespace TLSAbstractionLayer {
           return -1;
       }
 
-      if(SSL_CTX_set_min_proto_version(ctx,minVersion) == 0)
-      {
-        TLS_LOG_ERROR("setting minimum protocol version failed");
-        return -1;
-      }
-
       switch (maxProtocolVersion)
       {
         case V_1_1:
@@ -287,6 +285,17 @@ namespace TLSAbstractionLayer {
         default:
           TLS_LOG_ERROR("maximum protocol version doesn't match");
           return -1;
+      }
+
+      if (minVersion > maxVersion) {
+        TLS_LOG_ERROR("The min TLS version is higher than the max TLS version");
+        return -1;
+      }
+
+      if(SSL_CTX_set_min_proto_version(ctx,minVersion) == 0)
+      {
+        TLS_LOG_ERROR("setting minimum protocol version failed");
+        return -1;
       }
 
       if(SSL_CTX_set_max_proto_version(ctx,maxVersion) == 0)

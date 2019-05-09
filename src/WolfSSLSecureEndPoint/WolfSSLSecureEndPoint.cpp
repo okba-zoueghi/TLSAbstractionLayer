@@ -6,6 +6,7 @@
 #include <wolfssl/openssl/ssl.h>
 #include <wolfssl/options.h>
 #include <wolfssl/ssl.h>
+#include <wolfssl/test.h>
 
 /* Utilities */
 #include <sys/socket.h>
@@ -290,6 +291,12 @@ namespace TLSAbstractionLayer {
     }
 
     TLS_LOG_INFO("Loaded endpoint's private key");
+
+    /* Set RSA callbacks */
+    wolfSSL_CTX_SetRsaSignCb(ctx,myRsaSign);
+    wolfSSL_CTX_SetRsaVerifyCb(ctx,myRsaVerify);
+    /* Set RSA callbacks */
+      
     return 0;
   }
 

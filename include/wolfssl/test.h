@@ -2632,6 +2632,13 @@ static WC_INLINE int myDhCallback(WOLFSSL* ssl, struct DhKey* key,
 static WC_INLINE int myRsaSign(WOLFSSL* ssl, const byte* in, word32 inSz,
         byte* out, word32* outSz, const byte* key, word32 keySz, void* ctx)
 {
+    printf("DATA to Sign size : %d\n", inSz);
+    printf("\n--------------------------------\n");
+    unsigned int i = 0;
+    for (i = 0; i < inSz; i++) {
+      printf("%02X ",in[i]);
+    }
+    printf("\n--------------------------------\n");
     WC_RNG  rng;
     int     ret;
     word32  idx = 0;
@@ -2666,10 +2673,17 @@ static WC_INLINE int myRsaSign(WOLFSSL* ssl, const byte* in, word32 inSz,
         wc_FreeRsaKey(&myKey);
     }
     wc_FreeRng(&rng);
-
 #ifdef TEST_PK_PRIVKEY
     free(keyBuf);
 #endif
+
+printf("Signed DATA size : %d\n", *outSz);
+printf("\n--------------------------------\n");
+i = 0;
+for (i = 0; i < *outSz; i++) {
+  printf("%02X ",out[i]);
+}
+printf("\n--------------------------------\n");
 
     WOLFSSL_PKMSG("PK RSA Sign: ret %d, outSz %d\n", ret, *outSz);
 
@@ -2680,6 +2694,14 @@ static WC_INLINE int myRsaSign(WOLFSSL* ssl, const byte* in, word32 inSz,
 static WC_INLINE int myRsaVerify(WOLFSSL* ssl, byte* sig, word32 sigSz,
         byte** out, const byte* key, word32 keySz, void* ctx)
 {
+
+  printf("DATA to verify size : %d\n", sigSz);
+  printf("\n--------------------------------\n");
+  unsigned int i = 0;
+  for (i = 0; i < sigSz; i++) {
+    printf("%02X ",sig[i]);
+  }
+  printf("\n--------------------------------\n");
     int     ret;
     word32  idx = 0;
     RsaKey  myKey;
@@ -2698,6 +2720,14 @@ static WC_INLINE int myRsaVerify(WOLFSSL* ssl, byte* sig, word32 sigSz,
         wc_FreeRsaKey(&myKey);
     }
 
+    printf("DATA verified size : %d\n", ret);
+    printf("\n--------------------------------\n");
+    int k = 0;
+    for (k = 0; k < ret; k++) {
+      printf("%02X ",(*out)[k]);
+    }
+    printf("\n--------------------------------\n");
+
     WOLFSSL_PKMSG("PK RSA Verify: ret %d\n", ret);
 
     return ret;
@@ -2706,6 +2736,8 @@ static WC_INLINE int myRsaVerify(WOLFSSL* ssl, byte* sig, word32 sigSz,
 static WC_INLINE int myRsaSignCheck(WOLFSSL* ssl, byte* sig, word32 sigSz,
         byte** out, const byte* key, word32 keySz, void* ctx)
 {
+
+  printf("\n\nWhat am I doing???\n\n");
     int     ret;
     word32  idx = 0;
     RsaKey  myKey;

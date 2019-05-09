@@ -24,6 +24,8 @@ namespace TLSAbstractionLayer
 
   enum PrivateKeySource :std::uint8_t {FROM_FILE = 0, FROM_HSM};
 
+  const std::uint8_t TLS_HEADER_SIZE = 5;
+
   class SecureEndPoint
   {
 

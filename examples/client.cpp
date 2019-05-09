@@ -12,6 +12,8 @@
 #define PRIVATE_KEY_PATH 			    "./ca/intermediate/private/client.key.pem"
 #define CHAIN_OF_TRUST_CERT_PATH	"./ca/intermediate/certs/ca-chain.cert.pem"
 
+enum ReceiveTlsPacketState {RECEIVE_HEADER, RECEIVE_APPLICATION_DATA, TLS_PROCESS_DATA,
+  CLOSE_CONNECTION, HANDLE_SOCK_ERROR, HANDLE_TLS_ERROR};
 
 
 int main(int argc, char **argv)
@@ -111,20 +113,113 @@ int main(int argc, char **argv)
 
   if (res == TLSAbstractionLayer::HandshakeState::ESTABLISHED) {
     printf("Handshake established\n");
+
+    /* Max TLS message size to receive is 1000 bytes */
     char encMsg[1000];
-    int ret = recv(sock,encMsg,1000,0);
-    printf("Received --> encMsg : %s, encMsgSize : %d\n",encMsg,ret);
+    /* Max TLS message size to receive is 1000 bytes */
 
+    /* Variable to store the size of the TLS message (header + application data) */
+    unsigned int tlsMessageSize;
+
+    /* Variable to store the length of the application data */
+    unsigned int tlsAppDatalength;
+
+    int ret;
+    int length;
     char * clearMsg;
-    ret = tlsClient.readFromBuffer(encMsg,ret,&clearMsg);
 
-    //tlsClient.receive(msg,100);
-    printf("Decrypted message --> clearMsg : %s, clearMsgsize : %d\n",clearMsg,ret);
+    ReceiveTlsPacketState state = RECEIVE_HEADER;
+
+    while (1) {
+
+      switch (state) {
+
+        case RECEIVE_HEADER:
+        printf("RECEIVE_HEADER\n");
+          /* Receive only the header to determine the encrypted application data size */
+          ret = 0;
+          length = 0;
+
+          do {
+            ret = recv(sock,encMsg + length, TLSAbstractionLayer::TLS_HEADER_SIZE - length,0);
+            length += ret;
+          } while( (length < TLSAbstractionLayer::TLS_HEADER_SIZE) && (ret != 0) && (ret < 0) );
+
+          if (ret < 0) {
+            state = HANDLE_SOCK_ERROR;
+          }
+          else if (ret == 0) {
+            state = CLOSE_CONNECTION;
+          }
+          else{
+            state = RECEIVE_APPLICATION_DATA;
+          }
+          break;
+
+        case RECEIVE_APPLICATION_DATA:
+        printf("RECEIVE_APPLICATION_DATA\n");
+          /* Retrieve the size of the application data from the header */
+          tlsAppDatalength = (encMsg[3] << 8) + encMsg[4];
+
+          length = 0;
+
+          /* Receive the remaining message (the application data) */
+          do {
+            ret = recv(sock, encMsg + TLSAbstractionLayer::TLS_HEADER_SIZE + length, tlsAppDatalength - length,0);
+            length += ret;
+          } while( (length < tlsAppDatalength) && (ret != 0) && (ret < 0) );
+
+          if (ret < 0) {
+            state = HANDLE_SOCK_ERROR;
+          }
+          else if (ret == 0) {
+            state = CLOSE_CONNECTION;
+          }
+          else{
+            /* Calculate the total message size (header + application data) */
+            tlsMessageSize = TLSAbstractionLayer::TLS_HEADER_SIZE + tlsAppDatalength;
+            printf("Received --> encMsgSize : %d\n", tlsMessageSize);
+            state = TLS_PROCESS_DATA;
+          }
+          break;
+
+        case TLS_PROCESS_DATA:
+        printf("TLS_PROCESS_DATA\n");
+          /* Process the received TLS message (decrypt the check MAC) */
+          ret = tlsClient.readFromBuffer(encMsg, tlsMessageSize, &clearMsg);
+          if (ret < 0) {
+            state = HANDLE_TLS_ERROR;
+          }
+          else{
+            printf("Decrypted message --> clearMsg : %s, clearMsgsize : %d\n",clearMsg,ret);
+            state = RECEIVE_HEADER;
+          }
+          break;
+
+        case HANDLE_SOCK_ERROR:
+        printf("HANDLE_SOCK_ERROR\n");
+          /* Here handle socket errors, in this example we close the connection*/
+          state = CLOSE_CONNECTION;
+          break;
+
+        case HANDLE_TLS_ERROR:
+        printf("HANDLE_TLS_ERROR\n");
+          /* Here handle TLS errors, in this example we close the connection*/
+          state = CLOSE_CONNECTION;
+          break;
+
+        case CLOSE_CONNECTION:
+        printf("CLOSE_CONNECTION\n");
+          close(sock);
+          exit(0);
+      }
+    }
   }
   else if(res == TLSAbstractionLayer::HandshakeState::FAILED)
   {
     printf("Handshake failed\n");
   }
-    close(sock);
+
+  close(sock);
 
 }

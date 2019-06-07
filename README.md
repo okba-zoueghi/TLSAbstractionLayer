@@ -16,10 +16,14 @@
 
 The TLSAbstractionLayer provides an API to the application layer allowing to use TLS independently from the underlying TLS library (e.g. openSSL, wolfSSL, etc…)
 
+![](images/TLSAbstractionLayer.png)
+
 ## 2. Architecture
 
 The abstraction layer consists of the abstract class 
 **SecureEndPoint** and several other classes, each implements TLS for a certain library. As illustrated in the class diagram, the class **SecureEndPoint** specifies the interface provided to the application layer and as an example the class **OpenSSLSecureEndPoint** implements the interface based on **OpenSSL**. In order to support another library, for instance, wolfSSL, a new class should be created which shall inherit from the class **SecureEndPoint** and implement the interface based on wolfSSL. The application using the abstraction layer is therefore independent from the underlying TLS library.
+
+![](images/ClassDiagram.png)
 
 
 ## 3. Functionalities

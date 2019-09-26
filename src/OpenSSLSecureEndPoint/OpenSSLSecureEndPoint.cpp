@@ -49,32 +49,15 @@ namespace TLSAbstractionLayer {
   }
 
   OpenSSLSecureEndPoint::OpenSSLSecureEndPoint (Protocol p,
-                          ProtocolVersion minV,
-                          ProtocolVersion maxV,
-                          EndPointRole epr,
-                          bool b,
-                          int sockfd,
-                          std::string pkp,
-                          std::string epcp,
-                          std::string cotcp,
-                          std::list<std::string> csl) :
+                          ProtocolVersion minV, ProtocolVersion maxV, EndPointRole epr, bool b,
+                          int sockfd, std::string pkp, std::string epcp, std::string cotcp, std::list<std::string> csl) :
                           SecureEndPoint(p, minV, maxV, epr, b, sockfd, pkp, epcp, cotcp, csl),
                           ctx(NULL), ssl(NULL), rbio(NULL), wbio(NULL), DTLSCookieSent(false) {
                           }
 
   OpenSSLSecureEndPoint::OpenSSLSecureEndPoint (const OpenSSLSecureEndPoint& opensslEndpoint):
-                          SecureEndPoint(opensslEndpoint.protocol,
-                                        opensslEndpoint.minProtocolVersion,
-                                        opensslEndpoint.maxProtocolVersion,
-                                        opensslEndpoint.endPointRole,
-                                        opensslEndpoint.verifyPeerCerificate,
-                                        opensslEndpoint.socketFileDescriptor,
-                                        opensslEndpoint.privateKeyPath,
-                                        opensslEndpoint.endPointCertPath,
-                                        opensslEndpoint.chainOfTrustCertPath,
-                                        opensslEndpoint.cipherSuiteList),
-                                        ctx(NULL), ssl(NULL), rbio(NULL),
-                                        wbio(NULL), DTLSCookieSent(false){
+                          SecureEndPoint(opensslEndpoint), ctx(NULL), ssl(NULL), rbio(NULL),
+                          wbio(NULL), DTLSCookieSent(false){
 
                                         }
   OpenSSLSecureEndPoint& OpenSSLSecureEndPoint::operator=(const OpenSSLSecureEndPoint& opensslEndpoint){
@@ -85,17 +68,8 @@ namespace TLSAbstractionLayer {
         SSL_free(ssl);
         ssl = NULL;
         DTLSCookieSent = false;
-        protocol = opensslEndpoint.protocol;
-        minProtocolVersion = opensslEndpoint.minProtocolVersion;
-        maxProtocolVersion = opensslEndpoint.maxProtocolVersion;
-        endPointRole = opensslEndpoint.endPointRole;
-        verifyPeerCerificate = opensslEndpoint.verifyPeerCerificate;
-        socketFileDescriptor = opensslEndpoint.socketFileDescriptor;
-        privateKeyPath = opensslEndpoint.privateKeyPath;
-        endPointCertPath = opensslEndpoint.endPointCertPath;
-        chainOfTrustCertPath = opensslEndpoint.chainOfTrustCertPath;
-        cipherSuiteList = opensslEndpoint.cipherSuiteList;
-        handshake = HandshakeState::NOTESTABLISHED;
+
+        SecureEndPoint::operator=(opensslEndpoint);
       }
       return *this;
   }

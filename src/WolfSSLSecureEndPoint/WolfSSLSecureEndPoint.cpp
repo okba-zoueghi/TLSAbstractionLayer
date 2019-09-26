@@ -20,31 +20,14 @@ namespace TLSAbstractionLayer {
   }
 
   WolfSSLSecureEndPoint::WolfSSLSecureEndPoint (Protocol p,
-                          ProtocolVersion minV,
-                          ProtocolVersion maxV,
-                          EndPointRole epr,
-                          bool b,
-                          int sockfd,
-                          std::string pkp,
-                          std::string epcp,
-                          std::string cotcp,
-                          std::list<std::string> csl):
+                          ProtocolVersion minV, ProtocolVersion maxV, EndPointRole epr, bool b,
+                          int sockfd, std::string pkp, std::string epcp, std::string cotcp, std::list<std::string> csl):
                           SecureEndPoint(p, minV, maxV, epr, b, sockfd, pkp, epcp, cotcp, csl),
                           ctx(NULL), ssl(NULL), wbio(NULL), rbio(NULL){
   }
 
   WolfSSLSecureEndPoint::WolfSSLSecureEndPoint (const WolfSSLSecureEndPoint& wolfsslEndpoint):
-                          SecureEndPoint(wolfsslEndpoint.protocol,
-                                        wolfsslEndpoint.minProtocolVersion,
-                                        wolfsslEndpoint.maxProtocolVersion,
-                                        wolfsslEndpoint.endPointRole,
-                                        wolfsslEndpoint.verifyPeerCerificate,
-                                        wolfsslEndpoint.socketFileDescriptor,
-                                        wolfsslEndpoint.privateKeyPath,
-                                        wolfsslEndpoint.endPointCertPath,
-                                        wolfsslEndpoint.chainOfTrustCertPath,
-                                        wolfsslEndpoint.cipherSuiteList),
-                                        ctx(NULL), ssl(NULL), wbio(NULL), rbio(NULL){
+                          SecureEndPoint(wolfsslEndpoint), ctx(NULL), ssl(NULL), wbio(NULL), rbio(NULL){
   }
 
   WolfSSLSecureEndPoint& WolfSSLSecureEndPoint::operator=(const WolfSSLSecureEndPoint& wolfsslEndpoint){
@@ -64,20 +47,7 @@ namespace TLSAbstractionLayer {
 
       wolfSSL_Cleanup();
 
-      protocol = wolfsslEndpoint.protocol;
-      minProtocolVersion = wolfsslEndpoint.minProtocolVersion;
-      maxProtocolVersion = wolfsslEndpoint.maxProtocolVersion;
-      endPointRole = wolfsslEndpoint.endPointRole;
-      verifyPeerCerificate = wolfsslEndpoint.verifyPeerCerificate;
-      socketFileDescriptor = wolfsslEndpoint.socketFileDescriptor;
-      privateKeySource = wolfsslEndpoint.privateKeySource;
-      privateKeyId = wolfsslEndpoint.privateKeyId;
-      privateKeyPin = wolfsslEndpoint.privateKeyPin;
-      privateKeyPath = wolfsslEndpoint.privateKeyPath;
-      endPointCertPath = wolfsslEndpoint.endPointCertPath;
-      chainOfTrustCertPath = wolfsslEndpoint.chainOfTrustCertPath;
-      cipherSuiteList = wolfsslEndpoint.cipherSuiteList;
-      handshake = HandshakeState::NOTESTABLISHED;
+      SecureEndPoint::operator=(wolfsslEndpoint);
     }
     return *this;
   }

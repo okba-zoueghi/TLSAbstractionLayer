@@ -5,16 +5,8 @@ namespace TLSAbstractionLayer {
   SecureEndPoint::SecureEndPoint(){
   }
 
-  SecureEndPoint::SecureEndPoint (Protocol p,
-                  ProtocolVersion minV,
-                  ProtocolVersion maxV,
-                  EndPointRole epr,
-                  bool b,
-                  int sockfd,
-                  std::string pkp,
-                  std::string epcp,
-                  std::string cotcp,
-                  std::list<std::string> csl) :
+  SecureEndPoint::SecureEndPoint (Protocol p, ProtocolVersion minV, ProtocolVersion maxV, EndPointRole epr, bool b,
+                  int sockfd, std::string pkp, std::string epcp, std::string cotcp, std::list<std::string> csl) :
                   protocol(p), minProtocolVersion(minV), maxProtocolVersion(maxV),
                   endPointRole(epr), handshake(HandshakeState::NOTESTABLISHED), verifyPeerCerificate(b),
                   socketFileDescriptor(sockfd), privateKeyPath(pkp), endPointCertPath(epcp),

@@ -1,2 +1,0 @@
-V	290127164833Z		1000	unknown	/C=DE/ST=Deutschland/O=Bosch Gmbh/OU=VRTE CA/CN=VRTE Intermediate CA
-V	290127165741Z		1001	unknown	/C=DE/ST=Deutschland/O=VRTE/OU=VRTE CA/CN=VRTE Intermediate CA

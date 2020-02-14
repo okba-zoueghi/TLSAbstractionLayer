@@ -6,8 +6,8 @@
 
 
 #define PORT 						           4433
-#define CERTIFICATE_PATH			     "../../ca/intermediate/certs/server.cert.pem"
-#define CHAIN_OF_TRUST_CERT_PATH	 "../../ca/intermediate/certs/ca-chain.cert.pem"
+#define CERTIFICATE_PATH			    "../../certificates/server.chain.cert.pem"
+#define CHAIN_OF_TRUST_CERT_PATH	"../../certificates/ca.cert.pem"
 #define MSG 						           "Hello world"
 
 using namespace TLSAbstractionLayer;

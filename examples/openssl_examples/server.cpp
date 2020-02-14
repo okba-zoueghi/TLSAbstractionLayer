@@ -6,9 +6,9 @@
 
 
 #define PORT 						           4433
-#define CERTIFICATE_PATH			     "../../ca/intermediate/certs/server.cert.pem"
-#define PRIVATE_KEY_PATH 			     "../../ca/intermediate/private/server.key.pem"
-#define CHAIN_OF_TRUST_CERT_PATH	 "../../ca/intermediate/certs/ca-chain.cert.pem"
+#define CERTIFICATE_PATH			    "../../certificates/server.chain.cert.pem"
+#define PRIVATE_KEY_PATH 			    "../../keys/server.key.pem"
+#define CHAIN_OF_TRUST_CERT_PATH	"../../certificates/ca.cert.pem"
 #define MSG 						           "Hello world"
 
 

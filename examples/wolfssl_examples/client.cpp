@@ -7,9 +7,9 @@
 
 #define SERVER_PORT               4433
 #define SERVER_IP                 "127.0.0.1"
-#define CERTIFICATE_PATH			    "../../ca/intermediate/certs/client.cert.pem"
-#define PRIVATE_KEY_PATH 			    "../../ca/intermediate/private/client.key.pem"
-#define CHAIN_OF_TRUST_CERT_PATH	"../../ca/intermediate/certs/ca-chain.cert.pem"
+#define CERTIFICATE_PATH			    "../../certificates/client.chain.cert.pem"
+#define PRIVATE_KEY_PATH 			    "../../keys/client.key.pem"
+#define CHAIN_OF_TRUST_CERT_PATH	"../../certificates/ca.cert.pem"
 
 enum ReceiveTlsPacketState {RECEIVE_HEADER, RECEIVE_APPLICATION_DATA, TLS_PROCESS_DATA,
   CLOSE_CONNECTION, HANDLE_SOCK_ERROR, HANDLE_TLS_ERROR};

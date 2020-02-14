@@ -385,7 +385,7 @@ First we have to create a folder for the build.
 mkdir build
 ```
 
-The library supports WolfSSL and OpenSSL. By default, the library builds using both WolfSSL and OpenSSL.
+The library supports WolfSSL and OpenSSL. By default, the library builds using both WolfSSL and OpenSSL. **(You Should have WolfSSL and OpenSSL installed)**
 
 ```bash
 cd build
@@ -393,6 +393,7 @@ cmake ..
 ```
 
 To build the library with only OpenSSL, build with the following command:
+**(You Should have OpenSSL installed)**
 
 ```bash
 cd build
@@ -400,6 +401,7 @@ cmake -D USE_WOLFSSL=FALSE ..
 ```
 
 To build the library with only WolfSSL, build with the following command:
+**(You Should have WolfSSL installed)**
 
 ```bash
 cd build

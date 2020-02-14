@@ -333,7 +333,7 @@ namespace TLSAbstractionLayer {
 
     TLS_LOG_INFO("Loaded chain of trust certificate");
 
-    if (SSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) <= 0)
+    if (SSL_CTX_use_certificate_chain_file(ctx, cert) <= 0)
     {
       TLS_LOG_ERROR("Loading endpoint's certificate failed");
       return -1;

@@ -220,7 +220,7 @@ namespace TLSAbstractionLayer {
 
     TLS_LOG_INFO("Loaded chain of trust certificate");
 
-    if (wolfSSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) != SSL_SUCCESS)
+    if (wolfSSL_CTX_use_certificate_chain_file(ctx, cert) != SSL_SUCCESS)
     {
       TLS_LOG_ERROR("Loading endpoint's certificate failed");
       return -1;

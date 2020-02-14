@@ -72,8 +72,7 @@ int main(int argc, char **argv)
       bool verifyPeerCerificate = true;
       std::list<std::string> l;
 
-      TLSAbstractionLayer::WolfSSLSecureEndPoint tlsServer;
-      //TLSAbstractionLayer::OpenSSLSecureEndPoint tlsServer;
+      TLSAbstractionLayer::OpenSSLSecureEndPoint tlsServer;
 
       /* Set protocol and role */
       tlsServer.setProtocol(TLSAbstractionLayer::Protocol::TLS);

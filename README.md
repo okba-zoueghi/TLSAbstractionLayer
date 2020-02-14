@@ -10,7 +10,7 @@
 
 [5. Demo](#5-demo)
 
-[6. Compile](#6-compile)
+[6. Build](#6-build)
 
 ## 1. Introduction
 
@@ -20,7 +20,7 @@ The TLSAbstractionLayer provides an API to the application layer allowing to use
 
 ## 2. Architecture
 
-The abstraction layer consists of the abstract class 
+The abstraction layer consists of the abstract class
 **SecureEndPoint** and several other classes, each implements TLS for a certain library. As illustrated in the class diagram, the class **SecureEndPoint** specifies the interface provided to the application layer and as an example the class **OpenSSLSecureEndPoint** implements the interface based on **OpenSSL**. In order to support another library, for instance, wolfSSL, a new class should be created which shall inherit from the class **SecureEndPoint** and implement the interface based on wolfSSL. The application using the abstraction layer is therefore independent from the underlying TLS library.
 
 ![](images/ClassDiagram.png)
@@ -235,7 +235,7 @@ The TLSAbstractionLayer allows the application layer to:
 ## 5. Demo
 
 
-To use the library, the application shall include the TLSAbstractionLayer header file which corresponds to one of the supported TLS libraries. Currently, the supported TLS libraries are OpenSSL and WolfSSL. 
+To use the library, the application shall include the TLSAbstractionLayer header file which corresponds to one of the supported TLS libraries. Currently, the supported TLS libraries are OpenSSL and WolfSSL.
 
 To use the OpenSSL based implementation, the following header file shall be included.
 
@@ -373,227 +373,35 @@ Now the data could be sent through the network using the socket API. *client_soc
 send(client_sock,encMsg,ret,0);
 ```
 
-Below is a full example of a TCP server using the class *OpenSSLSecureEndpoint*.
-For more details please refer to the folder examples.
+You will find several code samples in the *examples* folder.
 
 
 
-```c++
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <TLSAbstractionLayer/OpenSSLSecureEndPoint.hpp>
+## 6. Build
 
-
-#define PORT 			    4433
-#define CERTIFICATE_PATH            "./ca/intermediate/certs/server.cert.pem"
-#define CHAIN_OF_TRUST_CERT_PATH    "./ca/intermediate/certs/ca-chain.cert.pem"
-#define MSG 		            "Hello world"
-
-using namespace TLSAbstractionLayer;
-
-
-int main(int argc, char **argv)
-{
-
-  int listen_sock = 0;
-  int handshake = 0;
-  struct sockaddr_in addr;
-
-  //Create socket, bind and listen for connections
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(PORT);
-  addr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-  listen_sock = socket(AF_INET, SOCK_STREAM, 0);
-  if (listen_sock < 0)
-  {
-    perror("Unable to create socket");
-    exit(EXIT_FAILURE);
-  }
-  else
-  {
-    printf("Socket created, sock fd: %d\n",listen_sock);
-  }
-
-  if (bind(listen_sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
-  {
-    perror("Unable to bind");
-    exit(EXIT_FAILURE);
-  }
-
-  if (listen(listen_sock, 1) < 0)
-  {
-    perror("Unable to listen");
-    exit(EXIT_FAILURE);
-  }
-
-
-    /* Handle connections */
-    while(1)
-    {
-      struct sockaddr_in addr;
-      uint len = sizeof(addr);
-	    printf("Listening for connections ...\n");
-      int client_sock = accept(listen_sock, (struct sockaddr*)&addr, &len);
-      if (client_sock < 0)
-      {
-        perror("Unable to accept");
-        exit(EXIT_FAILURE);
-      }
-      else
-      {
-  	printf("Accepted connection, TCP handshake established\n");
-      }
-
-
-      std::string cert = CERTIFICATE_PATH;
-      std::string cacert = CHAIN_OF_TRUST_CERT_PATH;
-      bool verifyPeerCerificate = true;
-      std::list<std::string> l;
-      std::string privateKeyId = "0:01";
-      std::string privateKeyPin = "0000";
-
-      TLSAbstractionLayer::OpenSSLSecureEndPoint tlsServer;
-
-      /* Set protocol and role */
-      tlsServer.setProtocol(TLSAbstractionLayer::Protocol::TLS);
-      tlsServer.setEndPointRole(TLSAbstractionLayer::EndPointRole::SERVER);
-      /* Set protocol and role */
-
-      /* Configure certificates */
-      tlsServer.setEndPointCertPath(cert);
-      tlsServer.setChainOfTrustCertPath(cacert);
-      tlsServer.setPeerVerify(verifyPeerCerificate);
-      /* Configure certificates */
-
-      /* Configure ciher suites */
-      l.push_back(TLSAbstractionLayer::TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
-      tlsServer.setCipherSuiteList(l);
-      /* Configure ciher suites */
-
-      /* Configure TLS version */
-      tlsServer.setMinProtocolVersion(TLSAbstractionLayer::ProtocolVersion::V_1_2);
-      tlsServer.setMaxProtocolVersion(TLSAbstractionLayer::ProtocolVersion::V_1_2);
-      /* Configure TLS version */
-
-      /* Configure HSM attributes */
-      tlsServer.setPrivateKeySource(TLSAbstractionLayer::PrivateKeySource::FROM_HSM);
-      tlsServer.setHSMPrivateKeyId(privateKeyId);
-      tlsServer.setHSMPrivateKeyPin(privateKeyPin);
-      /* Configure HSM attributes */
-
-      /* Set socket fd */
-      tlsServer.setSocketFileDescriptor(client_sock);
-      /* Set socket fd */
-
-      int s = tlsServer.setupTLS();
-      if (s == -1) {
-        printf("TLS setup failed\n");
-        return -1;
-      }
-
-      s = tlsServer.setupIO(TLSAbstractionLayer::IO::SOCKET);
-      if (s == -1) {
-        printf("IO setup failed\n");
-        return -1;
-      }
-
-      int res = tlsServer.doHandshake();
-
-      s = tlsServer.setupIO(TLSAbstractionLayer::IO::BUFFER);
-      if (s == -1) {
-        printf("IO setup failed\n");
-        return -1;
-      }
-
-      if (res == TLSAbstractionLayer::HandshakeState::ESTABLISHED) {
-        printf("Plain text message  --> clearMsg : %s, clearMsgsize: %d\n",MSG,sizeof(MSG));
-
-        char * encMsg;
-        int ret = tlsServer.writeToBuffer(MSG,sizeof(MSG),&encMsg);
-        printf("Encrypted message --> encMsg :%s, size: %d\n",encMsg,ret);
-        send(client_sock,encMsg,ret,0);
-      }
-      else if(res == TLSAbstractionLayer::HandshakeState::FAILED)
-      {
-        printf("Handshake failed\n");
-      }
-      close(client_sock);
-		  printf("Connection closed\n");
-    }
-
-    close(listen_sock);
-}
-```
-## 6. Compile
-
-First we have to create a folder with the name **build** in the project root directory.
+First we have to create a folder for the build.
 
 ```bash
 mkdir build
 ```
 
-As the library depends on OpenSSL, we have to specify the folder containing OpenSSL libraries (libcrypto and libssl). The environment variable OPENSSL_LIB_DIR shall be set to the folder containing OpenSSL's libraries.
+The library supports WolfSSL and OpenSSL. By default, the library builds using both WolfSSL and OpenSSL.
 
 ```bash
-export OPENSSL_LIB_DIR=/absolute/path/to/openssl/lib/dir
+cd build
+cmake ..
 ```
 
-The library depends also on WolfSSL, therefore, we have to specify the folder containing WolfSSL library (libwolfssl). The environment variable WOLFSSL_LIB_DIR shall be set to the folder containing WolfSSL's library.
+To build the library with only OpenSSL, build with the following command:
 
 ```bash
-export WOLFSSL_LIB_DIR=/absolute/path/to/wolfssl/lib/dir
+cd build
+cmake -D USE_WOLFSSL=FALSE ..
 ```
 
-Another alternative is to use the libraries provided with the TLSAbstractionLayer. You could find OpenSSL's and WolfSSL's libraries under the folder libs.
-
-To build only the shared library, execute the following command:
+To build the library with only WolfSSL, build with the following command:
 
 ```bash
-make sharedlib
+cd build
+cmake -D USE_OPENSSL=FALSE ..
 ```
-
-To build the shared library as well as the examples, execute the following command:
-
-```bash
-make
-```
-
-To execute one of the examples for instance, server.exe, execute the following commands:
-
-```bash
-cd examples
-export LD_LIBRARY_PATH=../build:$OPENSSL_LIB_DIR:$WOLFSSL_LIB_DIR:$LD_LIBRARY_PATH
-./server.exe
-```
-
-The previous steps allow only to use the library without a HSM. If we try to execute for example the executable server_hsm.exe an error will occur. We use in the following a software HSM implementation to make the HSM examples work.
-
-First we have to install the HSM library.
-
-```bash
-cd libs/softwareHSM
-./install.sh
-```
-
-After installing the HSM library, we can use its command line to import some keys.
-Please note that keys shall be in the PKCS#8 format. To convert a key from the pem format to the PKCS#8 format the following openssl command line can be used.
-
-```bash
-openssl pkcs8 -topk8 -inform PEM -outform DER -in key.pem -out key.pkcs8 -nocrypt
-```
-
-In the folder libs/softwareHSM/keys_example we have a client private key and a server server private key in both formats PEM and PKCS8.
-
-We use now the HSM command line to import the keys into the HSM.
-
-```bash
-./softhsm --init-token --slot 0 --label "server-key"
-./softhsm --import ./keys_example/server_pkcs8.key --slot 0 --label "server-private-key" --id 01 --pin 0000
-./softhsm --init-token --slot 1 --label "client-key"
-./softhsm --import ./keys_example/client_pkcs8.key --slot 1 --label "client-private-key" --id 02 --pin 0000
-```
-now the HSM examples can be executed successfully.
-

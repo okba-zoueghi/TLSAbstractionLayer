@@ -4,7 +4,9 @@ if(NOT DEFINED OPENSSL_LIB_DIR)
   message( FATAL_ERROR "OPENSSL_LIB_DIR is undefined. Define it and retry!" )
 endif()
 
-set(TLSAbstractionLayer_LIB_DIR "../../../build/")
+if(NOT DEFINED TLSAbstractionLayer_LIB_DIR)
+  message( FATAL_ERROR "TLSAbstractionLayer_LIB_DIR is undefined. Define it and retry!" )
+endif()
 
 file(GLOB SOURCES
   "*.cpp"
